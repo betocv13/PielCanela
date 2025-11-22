@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { Product } from '@/types'
 import ProductCard from './ProductCard'
 import ProductCardSkeleton from './ProductCardSkeleton'
@@ -11,16 +11,40 @@ interface MenuSectionProps {
   loading?: boolean
 }
 
-const CATEGORIES = [
-  { id: 'all', label: 'All Drinks' },
-  { id: 'coffee', label: 'Coffee' },
-  { id: 'matcha', label: 'Matcha' },
-  { id: 'other', label: 'Other' },
-]
-
 const PRODUCTS_PER_PAGE = 6
 
 export default function MenuSection({ products, onOrderProduct, loading = false }: MenuSectionProps) {
+  // Dynamically derive categories from products
+  const categories = useMemo(() => {
+    const uniqueCategories = Array.from(new Set(products.map(p => p.category)))
+
+    // Sort categories alphabetically but keep common ones in a nice order
+    const categoryOrder = ['coffee', 'matcha', 'other']
+    uniqueCategories.sort((a, b) => {
+      const aIndex = categoryOrder.indexOf(a.toLowerCase())
+      const bIndex = categoryOrder.indexOf(b.toLowerCase())
+
+      // If both are in the order list, sort by that order
+      if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex
+      // If only a is in the list, it comes first
+      if (aIndex !== -1) return -1
+      // If only b is in the list, it comes first
+      if (bIndex !== -1) return 1
+      // Otherwise sort alphabetically
+      return a.localeCompare(b)
+    })
+
+    // Build category objects with proper labels
+    const categoryList = [
+      { id: 'all', label: 'All Drinks' },
+      ...uniqueCategories.map(cat => ({
+        id: cat.toLowerCase(),
+        label: cat.charAt(0).toUpperCase() + cat.slice(1)
+      }))
+    ]
+
+    return categoryList
+  }, [products])
   const [activeCategory, setActiveCategory] = useState('all')
   const [currentSlide, setCurrentSlide] = useState(0)
   const [displayCount, setDisplayCount] = useState(PRODUCTS_PER_PAGE)
@@ -29,10 +53,10 @@ export default function MenuSection({ products, onOrderProduct, loading = false 
   // Show skeleton loading when loading or products haven't loaded yet
   const isLoading = loading || products.length === 0
 
-  // Filter products by category
+  // Filter products by category (case-insensitive)
   const filteredProducts = activeCategory === 'all'
     ? products
-    : products.filter((p) => p.category === activeCategory)
+    : products.filter((p) => p.category.toLowerCase() === activeCategory.toLowerCase())
 
   // Reset slide and display count when category changes
   useEffect(() => {
@@ -78,7 +102,7 @@ export default function MenuSection({ products, onOrderProduct, loading = false 
 
         {/* Category Filter Pills */}
         <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-8">
-          {CATEGORIES.map((category) => (
+          {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => setActiveCategory(category.id)}

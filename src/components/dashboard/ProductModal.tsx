@@ -463,74 +463,84 @@ export default function ProductModal({
                   </label>
                 ))}
                 {customSizes.map((size, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedSizes.has(size.name)}
-                      onChange={(e) => {
-                        const newSet = new Set(selectedSizes)
-                        if (e.target.checked) {
-                          newSet.add(size.name)
-                        } else {
+                  <div key={idx} className="border border-gray-200 rounded-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedSizes.has(size.name)}
+                          onChange={(e) => {
+                            const newSet = new Set(selectedSizes)
+                            if (e.target.checked) {
+                              newSet.add(size.name)
+                            } else {
+                              newSet.delete(size.name)
+                            }
+                            setSelectedSizes(newSet)
+                          }}
+                          className="w-4 h-4 text-brand-brown border-gray-300 rounded focus:ring-brand-brown"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Custom Size</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newSet = new Set(selectedSizes)
                           newSet.delete(size.name)
-                        }
-                        setSelectedSizes(newSet)
-                      }}
-                      className="w-4 h-4 text-brand-brown border-gray-300 rounded focus:ring-brand-brown"
-                    />
-                    <input
-                      type="text"
-                      value={size.name}
-                      onChange={(e) => {
-                        const oldName = size.name
-                        const newSizes = [...customSizes]
-                        newSizes[idx] = { ...newSizes[idx], name: e.target.value }
-                        setCustomSizes(newSizes)
-                        // Update selected set
-                        const newSet = new Set(selectedSizes)
-                        newSet.delete(oldName)
-                        newSet.add(e.target.value)
-                        setSelectedSizes(newSet)
-                      }}
-                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
-                      placeholder="Name"
-                    />
-                    <input
-                      type="text"
-                      value={size.size}
-                      onChange={(e) => {
-                        const newSizes = [...customSizes]
-                        newSizes[idx] = { ...newSizes[idx], size: e.target.value }
-                        setCustomSizes(newSizes)
-                      }}
-                      className="w-20 px-2 py-1 text-sm border border-gray-300 rounded"
-                      placeholder="Size"
-                    />
-                    <span className="text-sm text-gray-500">+$</span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={size.priceAdjustment}
-                      onChange={(e) => {
-                        const newSizes = [...customSizes]
-                        newSizes[idx] = { ...newSizes[idx], priceAdjustment: parseFloat(e.target.value) || 0 }
-                        setCustomSizes(newSizes)
-                      }}
-                      className="w-16 px-2 py-1 text-sm border border-gray-300 rounded"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newSet = new Set(selectedSizes)
-                        newSet.delete(size.name)
-                        setSelectedSizes(newSet)
-                        setCustomSizes(customSizes.filter((_, i) => i !== idx))
-                      }}
-                      className="p-1 text-red-500 hover:bg-red-50 rounded"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                          setSelectedSizes(newSet)
+                          setCustomSizes(customSizes.filter((_, i) => i !== idx))
+                        }}
+                        className="p-1 text-red-500 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <input
+                        type="text"
+                        value={size.name}
+                        onChange={(e) => {
+                          const oldName = size.name
+                          const newSizes = [...customSizes]
+                          newSizes[idx] = { ...newSizes[idx], name: e.target.value }
+                          setCustomSizes(newSizes)
+                          // Update selected set
+                          const newSet = new Set(selectedSizes)
+                          newSet.delete(oldName)
+                          newSet.add(e.target.value)
+                          setSelectedSizes(newSet)
+                        }}
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                        placeholder="Name"
+                      />
+                      <input
+                        type="text"
+                        value={size.size}
+                        onChange={(e) => {
+                          const newSizes = [...customSizes]
+                          newSizes[idx] = { ...newSizes[idx], size: e.target.value }
+                          setCustomSizes(newSizes)
+                        }}
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                        placeholder="Size (e.g. 16oz)"
+                      />
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm text-gray-500">+$</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={size.priceAdjustment}
+                          onChange={(e) => {
+                            const newSizes = [...customSizes]
+                            newSizes[idx] = { ...newSizes[idx], priceAdjustment: parseFloat(e.target.value) || 0 }
+                            setCustomSizes(newSizes)
+                          }}
+                          className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                          placeholder="0.00"
+                        />
+                      </div>
+                    </div>
                   </div>
                 ))}
                 <button
@@ -572,62 +582,72 @@ export default function ProductModal({
                   </label>
                 ))}
                 {customMilk.map((milk, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedMilk.has(milk.name)}
-                      onChange={(e) => {
-                        const newSet = new Set(selectedMilk)
-                        if (e.target.checked) {
-                          newSet.add(milk.name)
-                        } else {
+                  <div key={idx} className="border border-gray-200 rounded-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedMilk.has(milk.name)}
+                          onChange={(e) => {
+                            const newSet = new Set(selectedMilk)
+                            if (e.target.checked) {
+                              newSet.add(milk.name)
+                            } else {
+                              newSet.delete(milk.name)
+                            }
+                            setSelectedMilk(newSet)
+                          }}
+                          className="w-4 h-4 text-brand-brown border-gray-300 rounded focus:ring-brand-brown"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Custom Milk</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newSet = new Set(selectedMilk)
                           newSet.delete(milk.name)
-                        }
-                        setSelectedMilk(newSet)
-                      }}
-                      className="w-4 h-4 text-brand-brown border-gray-300 rounded focus:ring-brand-brown"
-                    />
-                    <input
-                      type="text"
-                      value={milk.name}
-                      onChange={(e) => {
-                        const oldName = milk.name
-                        const newMilk = [...customMilk]
-                        newMilk[idx] = { ...newMilk[idx], name: e.target.value }
-                        setCustomMilk(newMilk)
-                        const newSet = new Set(selectedMilk)
-                        newSet.delete(oldName)
-                        newSet.add(e.target.value)
-                        setSelectedMilk(newSet)
-                      }}
-                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
-                      placeholder="Name"
-                    />
-                    <span className="text-sm text-gray-500">+$</span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={milk.priceAdjustment}
-                      onChange={(e) => {
-                        const newMilk = [...customMilk]
-                        newMilk[idx] = { ...newMilk[idx], priceAdjustment: parseFloat(e.target.value) || 0 }
-                        setCustomMilk(newMilk)
-                      }}
-                      className="w-16 px-2 py-1 text-sm border border-gray-300 rounded"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newSet = new Set(selectedMilk)
-                        newSet.delete(milk.name)
-                        setSelectedMilk(newSet)
-                        setCustomMilk(customMilk.filter((_, i) => i !== idx))
-                      }}
-                      className="p-1 text-red-500 hover:bg-red-50 rounded"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                          setSelectedMilk(newSet)
+                          setCustomMilk(customMilk.filter((_, i) => i !== idx))
+                        }}
+                        className="p-1 text-red-500 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        value={milk.name}
+                        onChange={(e) => {
+                          const oldName = milk.name
+                          const newMilk = [...customMilk]
+                          newMilk[idx] = { ...newMilk[idx], name: e.target.value }
+                          setCustomMilk(newMilk)
+                          const newSet = new Set(selectedMilk)
+                          newSet.delete(oldName)
+                          newSet.add(e.target.value)
+                          setSelectedMilk(newSet)
+                        }}
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                        placeholder="Name"
+                      />
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm text-gray-500">+$</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={milk.priceAdjustment}
+                          onChange={(e) => {
+                            const newMilk = [...customMilk]
+                            newMilk[idx] = { ...newMilk[idx], priceAdjustment: parseFloat(e.target.value) || 0 }
+                            setCustomMilk(newMilk)
+                          }}
+                          className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                          placeholder="0.00"
+                        />
+                      </div>
+                    </div>
                   </div>
                 ))}
                 <button
@@ -669,62 +689,72 @@ export default function ProductModal({
                   </label>
                 ))}
                 {customAddons.map((addon, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedAddons.has(addon.name)}
-                      onChange={(e) => {
-                        const newSet = new Set(selectedAddons)
-                        if (e.target.checked) {
-                          newSet.add(addon.name)
-                        } else {
+                  <div key={idx} className="border border-gray-200 rounded-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedAddons.has(addon.name)}
+                          onChange={(e) => {
+                            const newSet = new Set(selectedAddons)
+                            if (e.target.checked) {
+                              newSet.add(addon.name)
+                            } else {
+                              newSet.delete(addon.name)
+                            }
+                            setSelectedAddons(newSet)
+                          }}
+                          className="w-4 h-4 text-brand-brown border-gray-300 rounded focus:ring-brand-brown"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Custom Add-on</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newSet = new Set(selectedAddons)
                           newSet.delete(addon.name)
-                        }
-                        setSelectedAddons(newSet)
-                      }}
-                      className="w-4 h-4 text-brand-brown border-gray-300 rounded focus:ring-brand-brown"
-                    />
-                    <input
-                      type="text"
-                      value={addon.name}
-                      onChange={(e) => {
-                        const oldName = addon.name
-                        const newAddons = [...customAddons]
-                        newAddons[idx] = { ...newAddons[idx], name: e.target.value }
-                        setCustomAddons(newAddons)
-                        const newSet = new Set(selectedAddons)
-                        newSet.delete(oldName)
-                        newSet.add(e.target.value)
-                        setSelectedAddons(newSet)
-                      }}
-                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
-                      placeholder="Name"
-                    />
-                    <span className="text-sm text-gray-500">+$</span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={addon.priceAdjustment}
-                      onChange={(e) => {
-                        const newAddons = [...customAddons]
-                        newAddons[idx] = { ...newAddons[idx], priceAdjustment: parseFloat(e.target.value) || 0 }
-                        setCustomAddons(newAddons)
-                      }}
-                      className="w-16 px-2 py-1 text-sm border border-gray-300 rounded"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newSet = new Set(selectedAddons)
-                        newSet.delete(addon.name)
-                        setSelectedAddons(newSet)
-                        setCustomAddons(customAddons.filter((_, i) => i !== idx))
-                      }}
-                      className="p-1 text-red-500 hover:bg-red-50 rounded"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                          setSelectedAddons(newSet)
+                          setCustomAddons(customAddons.filter((_, i) => i !== idx))
+                        }}
+                        className="p-1 text-red-500 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        value={addon.name}
+                        onChange={(e) => {
+                          const oldName = addon.name
+                          const newAddons = [...customAddons]
+                          newAddons[idx] = { ...newAddons[idx], name: e.target.value }
+                          setCustomAddons(newAddons)
+                          const newSet = new Set(selectedAddons)
+                          newSet.delete(oldName)
+                          newSet.add(e.target.value)
+                          setSelectedAddons(newSet)
+                        }}
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                        placeholder="Name"
+                      />
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm text-gray-500">+$</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={addon.priceAdjustment}
+                          onChange={(e) => {
+                            const newAddons = [...customAddons]
+                            newAddons[idx] = { ...newAddons[idx], priceAdjustment: parseFloat(e.target.value) || 0 }
+                            setCustomAddons(newAddons)
+                          }}
+                          className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                          placeholder="0.00"
+                        />
+                      </div>
+                    </div>
                   </div>
                 ))}
                 <button
