@@ -67,8 +67,13 @@ export async function PATCH(request: Request) {
       'ordering_closed_message',
       'venmo_username',
       'cashapp_username',
+      'venmo_qr_url',
+      'cashapp_qr_url',
       'owner_email',
-      'notification_frequency'
+      'notification_frequency',
+      'global_milk_options',
+      'default_tax_rate',
+      'max_orders_per_slot'
     ]
 
     if (!allowedKeys.includes(key)) {

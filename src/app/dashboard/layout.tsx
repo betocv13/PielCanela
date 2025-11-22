@@ -8,6 +8,7 @@ import {
   ClipboardList,
   UtensilsCrossed,
   Clock,
+  Settings,
   LogOut,
   Menu,
   X
@@ -29,6 +30,11 @@ const navItems = [
     name: 'Business Hours',
     href: '/dashboard/hours',
     icon: Clock
+  },
+  {
+    name: 'Settings',
+    href: '/dashboard/settings',
+    icon: Settings
   },
 ]
 

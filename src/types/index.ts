@@ -32,6 +32,7 @@ export interface Product {
   sizes: SizeOption[]
   milk_options: MilkOption[]
   addons: AddonOption[]
+  tax_rate: number | null  // Per-product tax rate (percentage), null uses default
   created_at: string
   updated_at: string
 }
@@ -101,8 +102,13 @@ export interface AppSettings {
   ordering_closed_message: string
   venmo_username: string
   cashapp_username: string
+  venmo_qr_url: string
+  cashapp_qr_url: string
   owner_email: string
   notification_frequency: 'instant' | 'batched' | 'daily'
+  global_milk_options: MilkOption[]
+  default_tax_rate: number
+  max_orders_per_slot: number
 }
 
 // Customer form data
@@ -138,6 +144,7 @@ export interface ProductFormData {
   addons: AddonOption[]
   available: boolean
   image_url?: string | null
+  tax_rate?: number | null  // Per-product tax rate (percentage), null uses default
 }
 
 // API Response types
