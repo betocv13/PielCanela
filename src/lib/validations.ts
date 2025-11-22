@@ -54,9 +54,12 @@ export const productFormSchema = z.object({
     .max(100, 'Product name must be less than 100 characters'),
   description: z
     .string()
-    .max(150, 'Description must be less than 150 characters')
+    .max(500, 'Description must be less than 500 characters')
     .optional(),
-  category: z.enum(['coffee', 'matcha', 'other']),
+  category: z
+    .string()
+    .min(1, 'Category is required')
+    .max(50, 'Category must be less than 50 characters'),
   base_price: z
     .number()
     .positive('Price must be greater than 0')
@@ -64,25 +67,26 @@ export const productFormSchema = z.object({
   sizes: z
     .array(
       z.object({
-        name: z.string(),
-        size: z.string(),
+        name: z.string().min(1),
+        size: z.string().min(1),
         priceAdjustment: z.number(),
       })
     )
     .min(1, 'At least one size is required'),
   milk_options: z.array(
     z.object({
-      name: z.string(),
+      name: z.string().min(1),
       priceAdjustment: z.number(),
     })
   ),
   addons: z.array(
     z.object({
-      name: z.string(),
+      name: z.string().min(1),
       priceAdjustment: z.number(),
     })
   ),
   available: z.boolean(),
+  image_url: z.string().nullable().optional(),
 })
 
 // Business hours validation

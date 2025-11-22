@@ -24,7 +24,7 @@ export interface Product {
   id: string
   name: string
   description: string | null
-  category: 'coffee' | 'matcha' | 'other'
+  category: string
   base_price: number
   image_url: string | null
   available: boolean
@@ -131,13 +131,13 @@ export interface CreateOrderPayload {
 export interface ProductFormData {
   name: string
   description?: string
-  category: 'coffee' | 'matcha' | 'other'
+  category: string
   base_price: number
   sizes: SizeOption[]
   milk_options: MilkOption[]
   addons: AddonOption[]
   available: boolean
-  image?: File | null
+  image_url?: string | null
 }
 
 // API Response types
