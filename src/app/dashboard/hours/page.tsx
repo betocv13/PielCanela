@@ -274,12 +274,12 @@ export default function BusinessHoursPage() {
                     <button
                       onClick={() => updateDay(day.day_of_week, 'is_open', !day.is_open)}
                       className={`relative w-12 h-6 rounded-full transition-colors ${
-                        day.is_open ? 'bg-gray-300' : 'bg-brand-brown'
+                        day.is_open ? 'bg-brand-brown' : 'bg-gray-300'
                       }`}
                     >
                       <span
                         className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                          day.is_open ? 'translate-x-0.5' : 'translate-x-6'
+                          day.is_open ? 'translate-x-6' : 'translate-x-0.5'
                         }`}
                       />
                     </button>
