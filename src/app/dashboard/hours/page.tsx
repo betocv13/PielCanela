@@ -279,7 +279,7 @@ export default function BusinessHoursPage() {
                     >
                       <span
                         className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                          day.is_open ? 'translate-x-6' : 'translate-x-0.5'
+                          day.is_open ? 'translate-x-[1.625rem]' : 'translate-x-0.5'
                         }`}
                       />
                     </button>
