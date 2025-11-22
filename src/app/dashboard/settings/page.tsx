@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import {
-  Settings,
   DollarSign,
   Milk,
   Hash,

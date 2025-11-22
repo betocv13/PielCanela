@@ -153,15 +153,6 @@ export async function POST(request: Request) {
     // Recalculate item totals with global milk prices
     let subtotal = 0
     const updatedItems = body.items.map(item => {
-      // Find global milk price if milk is selected
-      let milkPriceAdjustment = 0
-      if (item.milk) {
-        const globalMilk = globalMilkOptions.find(m => m.name === item.milk)
-        if (globalMilk) {
-          milkPriceAdjustment = globalMilk.priceAdjustment
-        }
-      }
-
       // Note: The itemTotal from frontend should already be calculated
       // We trust it but could recalculate here if needed
       subtotal += item.itemTotal
