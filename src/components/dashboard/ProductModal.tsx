@@ -86,9 +86,9 @@ export default function ProductModal({
   const [customCategory, setCustomCategory] = useState('')
 
   // Combine default and existing categories
-  const allCategories = [...new Set([...DEFAULT_CATEGORIES, ...existingCategories.map(c =>
+  const allCategories = Array.from(new Set([...DEFAULT_CATEGORIES, ...existingCategories.map(c =>
     c.charAt(0).toUpperCase() + c.slice(1)
-  )])]
+  )]))
 
   // Initialize form when product changes
   useEffect(() => {
