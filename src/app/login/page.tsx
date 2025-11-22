@@ -1,10 +1,19 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+
+// Only these emails are authorized to login
+const AUTHORIZED_EMAILS = [
+  'betito.castillo.98@icloud.com',
+  'pielcanelacoffee@gmail.com'
+]
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -15,16 +24,41 @@ export default function LoginPage() {
     setError('')
     setIsLoading(true)
 
-    // TODO: Implement actual authentication
     try {
-      // Simulating API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Check if email is authorized
+      const normalizedEmail = email.toLowerCase().trim()
+      if (!AUTHORIZED_EMAILS.includes(normalizedEmail)) {
+        setError('This email is not authorized to access the dashboard')
+        setIsLoading(false)
+        return
+      }
 
-      // For now, just log the attempt
-      console.log('Login attempt:', { email })
+      // Validate password length
+      if (password.length < 8) {
+        setError('Password must be at least 8 characters')
+        setIsLoading(false)
+        return
+      }
 
-      // Show placeholder message
-      setError('Authentication not yet implemented')
+      const supabase = createClient()
+
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password,
+      })
+
+      if (authError) {
+        if (authError.message.includes('Invalid login credentials')) {
+          setError('Invalid email or password')
+        } else {
+          setError(authError.message)
+        }
+        return
+      }
+
+      // Successful login - redirect to dashboard
+      router.push('/dashboard')
+      router.refresh()
     } catch {
       setError('An error occurred. Please try again.')
     } finally {
@@ -110,38 +144,10 @@ export default function LoginPage() {
               </button>
             </form>
 
-            {/* Divider */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">or</span>
-              </div>
-            </div>
-
-            {/* Additional Options */}
-            <div className="space-y-3">
-              <p className="text-center text-sm text-gray-600">
-                Don&apos;t have an account?{' '}
-                <button
-                  type="button"
-                  className="text-brand-brown font-medium hover:text-brand-pink transition-colors"
-                  onClick={() => setError('Registration not yet implemented')}
-                >
-                  Sign up
-                </button>
-              </p>
-              <p className="text-center text-sm">
-                <button
-                  type="button"
-                  className="text-brand-brown font-medium hover:text-brand-pink transition-colors"
-                  onClick={() => setError('Password reset not yet implemented')}
-                >
-                  Forgot your password?
-                </button>
-              </p>
-            </div>
+            {/* Info text */}
+            <p className="text-center text-sm text-gray-500 mt-4">
+              Access restricted to authorized users only
+            </p>
           </div>
         </div>
       </div>
