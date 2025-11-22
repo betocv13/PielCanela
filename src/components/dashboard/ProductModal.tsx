@@ -279,7 +279,7 @@ export default function ProductModal({
     const name = `Custom ${customSizes.length + 1}`
     const newSize: SizeOption = { name, size: '', priceAdjustment: 0 }
     setCustomSizes([...customSizes, newSize])
-    setSelectedSizes(new Set([...selectedSizes, name]))
+    setSelectedSizes(new Set([...Array.from(selectedSizes), name]))
   }
 
   // Add custom milk
@@ -287,7 +287,7 @@ export default function ProductModal({
     const name = `Custom Milk ${customMilk.length + 1}`
     const newMilk: MilkOption = { name, priceAdjustment: 0 }
     setCustomMilk([...customMilk, newMilk])
-    setSelectedMilk(new Set([...selectedMilk, name]))
+    setSelectedMilk(new Set([...Array.from(selectedMilk), name]))
   }
 
   // Add custom addon
@@ -295,7 +295,7 @@ export default function ProductModal({
     const name = `Custom Add-on ${customAddons.length + 1}`
     const newAddon: AddonOption = { name, priceAdjustment: 0 }
     setCustomAddons([...customAddons, newAddon])
-    setSelectedAddons(new Set([...selectedAddons, name]))
+    setSelectedAddons(new Set([...Array.from(selectedAddons), name]))
   }
 
   if (!isOpen) return null
