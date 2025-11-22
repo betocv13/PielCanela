@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Instagram, Facebook } from 'lucide-react'
 
 export default function Footer() {
@@ -10,9 +11,14 @@ export default function Footer() {
       <div className="container-custom py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Logo */}
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">☕</span>
-            <span className="font-heading text-brand-brown text-xl">PC</span>
+          <div className="flex items-center">
+            <Image
+              src="/images/footerlogo.png"
+              alt="Piel Canela Coffee"
+              width={120}
+              height={60}
+              className="h-12 w-auto"
+            />
           </div>
 
           {/* Newsletter / Contact */}

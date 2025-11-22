@@ -16,9 +16,12 @@ const CATEGORIES = [
   { id: 'other', label: 'Other' },
 ]
 
+const PRODUCTS_PER_PAGE = 6
+
 export default function MenuSection({ products, onOrderProduct }: MenuSectionProps) {
   const [activeCategory, setActiveCategory] = useState('all')
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [displayCount, setDisplayCount] = useState(PRODUCTS_PER_PAGE)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // Filter products by category
@@ -26,13 +29,19 @@ export default function MenuSection({ products, onOrderProduct }: MenuSectionPro
     ? products
     : products.filter((p) => p.category === activeCategory)
 
-  // Reset slide when category changes
+  // Reset slide and display count when category changes
   useEffect(() => {
     setCurrentSlide(0)
+    setDisplayCount(PRODUCTS_PER_PAGE)
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' })
     }
   }, [activeCategory])
+
+  // Handle View More click
+  const handleViewMore = () => {
+    setDisplayCount(filteredProducts.length)
+  }
 
   // Handle scroll to update dot pagination
   const handleScroll = () => {
@@ -81,7 +90,7 @@ export default function MenuSection({ products, onOrderProduct }: MenuSectionPro
 
         {/* Desktop Grid - 2 rows x 3 cards */}
         <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.slice(0, 6).map((product) => (
+          {filteredProducts.slice(0, displayCount).map((product) => (
             <ProductCard
               key={product.id}
               product={product}
@@ -127,10 +136,13 @@ export default function MenuSection({ products, onOrderProduct }: MenuSectionPro
           )}
         </div>
 
-        {/* View More Button (if more than 6 products) */}
-        {filteredProducts.length > 6 && (
+        {/* View More Button (only show if there are more products to load) */}
+        {displayCount < filteredProducts.length && (
           <div className="hidden md:flex justify-center mt-8">
-            <button className="px-6 py-2.5 border-2 border-brand-brown text-brand-brown rounded-button font-medium hover:bg-brand-brown hover:text-white transition-colors">
+            <button
+              onClick={handleViewMore}
+              className="px-6 py-2.5 border-2 border-brand-brown text-brand-brown rounded-button font-medium hover:bg-brand-brown hover:text-white transition-colors"
+            >
               View More
             </button>
           </div>
