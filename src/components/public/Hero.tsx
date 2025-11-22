@@ -10,7 +10,7 @@ export default function Hero() {
         fill
         className="object-cover md:hidden"
         priority
-        sizes="100vw"
+        sizes="(max-width: 767px) 100vw, 0px"
       />
       {/* Desktop image */}
       <Image
@@ -19,7 +19,7 @@ export default function Hero() {
         fill
         className="object-cover hidden md:block"
         priority
-        sizes="100vw"
+        sizes="(min-width: 768px) 100vw, 0px"
       />
     </section>
   )

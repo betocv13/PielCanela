@@ -3,10 +3,12 @@
 import { useState, useRef, useEffect } from 'react'
 import { Product } from '@/types'
 import ProductCard from './ProductCard'
+import ProductCardSkeleton from './ProductCardSkeleton'
 
 interface MenuSectionProps {
   products: Product[]
   onOrderProduct: (product: Product) => void
+  loading?: boolean
 }
 
 const CATEGORIES = [
@@ -18,11 +20,14 @@ const CATEGORIES = [
 
 const PRODUCTS_PER_PAGE = 6
 
-export default function MenuSection({ products, onOrderProduct }: MenuSectionProps) {
+export default function MenuSection({ products, onOrderProduct, loading = false }: MenuSectionProps) {
   const [activeCategory, setActiveCategory] = useState('all')
   const [currentSlide, setCurrentSlide] = useState(0)
   const [displayCount, setDisplayCount] = useState(PRODUCTS_PER_PAGE)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // Show skeleton loading when loading or products haven't loaded yet
+  const isLoading = loading || products.length === 0
 
   // Filter products by category
   const filteredProducts = activeCategory === 'all'
@@ -90,13 +95,17 @@ export default function MenuSection({ products, onOrderProduct }: MenuSectionPro
 
         {/* Desktop Grid - 2 rows x 3 cards */}
         <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.slice(0, displayCount).map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onOrder={onOrderProduct}
-            />
-          ))}
+          {isLoading
+            ? Array.from({ length: 6 }).map((_, index) => (
+                <ProductCardSkeleton key={index} />
+              ))
+            : filteredProducts.slice(0, displayCount).map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onOrder={onOrderProduct}
+                />
+              ))}
         </div>
 
         {/* Mobile Horizontal Scroll */}
@@ -107,18 +116,27 @@ export default function MenuSection({ products, onOrderProduct }: MenuSectionPro
             className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="flex-shrink-0 w-[280px] snap-center"
-              >
-                <ProductCard product={product} onOrder={onOrderProduct} />
-              </div>
-            ))}
+            {isLoading
+              ? Array.from({ length: 3 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex-shrink-0 w-[280px] snap-center"
+                  >
+                    <ProductCardSkeleton />
+                  </div>
+                ))
+              : filteredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="flex-shrink-0 w-[280px] snap-center"
+                  >
+                    <ProductCard product={product} onOrder={onOrderProduct} />
+                  </div>
+                ))}
           </div>
 
           {/* Dot Pagination */}
-          {filteredProducts.length > 1 && (
+          {!isLoading && filteredProducts.length > 1 && (
             <div className="flex justify-center gap-2 mt-4">
               {filteredProducts.map((_, index) => (
                 <button
