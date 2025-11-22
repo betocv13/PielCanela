@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import type { CreateOrderPayload, MilkOption } from '@/types'
+import type { CreateOrderPayload } from '@/types'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -99,7 +99,6 @@ export async function POST(request: Request) {
 
     const maxOrdersPerSlot = Number(settings.max_orders_per_slot) || 2
     const defaultTaxRate = Number(settings.default_tax_rate) || 0
-    const globalMilkOptions: MilkOption[] = (settings.global_milk_options as MilkOption[]) || []
 
     // Check if ordering is enabled
     const orderingEnabled = settings.ordering_enabled === true || settings.ordering_enabled === 'true'
