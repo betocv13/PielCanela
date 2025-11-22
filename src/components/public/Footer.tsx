@@ -22,15 +22,15 @@ export default function Footer() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="px-4 py-2 border border-brand-brown/30 rounded-button text-sm focus:outline-none focus:border-brand-brown"
+                className="px-4 py-2 border border-brand-brown/30 rounded-button text-sm focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink"
               />
-              <button className="px-4 py-2 bg-brand-brown text-white rounded-button text-sm font-medium hover:bg-brand-brown/90 transition-colors">
+              <button className="px-4 py-2 bg-brand-pink text-white rounded-button text-sm font-medium hover:bg-brand-pink/90 transition-colors">
                 Sign Up
               </button>
             </div>
             <Link
               href="/contact"
-              className="inline-block mt-3 text-sm text-brand-brown underline hover:text-brand-pink"
+              className="inline-block mt-3 text-sm text-brand-brown hover:text-brand-pink transition-colors"
             >
               Questions? Contact Us
             </Link>
@@ -39,19 +39,19 @@ export default function Footer() {
           {/* Social Links */}
           <div className="flex gap-4">
             <a
-              href="https://instagram.com/pielcanelacoffee"
+              href="https://www.instagram.com/pielcanela.coffee/"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 bg-white rounded-full text-brand-brown hover:bg-brand-brown hover:text-white transition-colors"
+              className="p-2 bg-white rounded-full text-brand-brown hover:bg-brand-pink hover:text-white transition-colors"
               aria-label="Instagram"
             >
               <Instagram className="w-5 h-5" />
             </a>
             <a
-              href="https://facebook.com/pielcanelacoffee"
+              href="https://www.facebook.com/profile.php?id=100091097307540"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 bg-white rounded-full text-brand-brown hover:bg-brand-brown hover:text-white transition-colors"
+              className="p-2 bg-white rounded-full text-brand-brown hover:bg-brand-pink hover:text-white transition-colors"
               aria-label="Facebook"
             >
               <Facebook className="w-5 h-5" />
