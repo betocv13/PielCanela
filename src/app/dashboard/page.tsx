@@ -27,11 +27,20 @@ export default function OrdersPage() {
     // Get today's date for filtering
     const today = format(new Date(), 'yyyy-MM-dd')
 
+    // Clean up old completed orders (older than 1 hour)
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    await supabase
+      .from('orders')
+      .delete()
+      .eq('status', 'completed')
+      .lt('completed_at', oneHourAgo)
+
+    // Fetch active orders (not completed) and today's completed orders
     const { data, error } = await supabase
       .from('orders')
       .select('*')
       .gte('pickup_date', today)
-      .neq('status', 'completed')
+      .or(`status.neq.completed,and(status.eq.completed,pickup_date.gte.${today})`)
       .order('pickup_date', { ascending: true })
       .order('pickup_time', { ascending: true })
 
