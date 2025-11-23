@@ -88,16 +88,27 @@ export async function PUT(request: Request) {
           close_time: day.close_time,
         })
         .eq('day_of_week', day.day_of_week)
+        .select()
     )
 
     const results = await Promise.all(updatePromises)
 
-    // Check for any errors
+    // Check for any errors or failed updates
     const errors = results.filter(r => r.error)
     if (errors.length > 0) {
       console.error('Error updating business hours:', errors)
       return NextResponse.json(
         { error: 'Failed to update some hours' },
+        { status: 500 }
+      )
+    }
+
+    // Check if all updates actually modified rows
+    const failedUpdates = results.filter(r => !r.data || r.data.length === 0)
+    if (failedUpdates.length > 0) {
+      console.error('Some hours were not updated - possible RLS issue or missing rows')
+      return NextResponse.json(
+        { error: 'Failed to update some hours - please check permissions' },
         { status: 500 }
       )
     }
