@@ -48,8 +48,20 @@ export default function SettingsPage() {
           const data = await res.json()
           const settings = data.settings
 
-          // Parse settings
-          setGlobalMilkOptions(settings.global_milk_options || [])
+          // Parse settings - handle JSON string or array
+          const milkOptions = settings.global_milk_options
+          if (Array.isArray(milkOptions)) {
+            setGlobalMilkOptions(milkOptions)
+          } else if (typeof milkOptions === 'string') {
+            try {
+              const parsed = JSON.parse(milkOptions)
+              setGlobalMilkOptions(Array.isArray(parsed) ? parsed : [])
+            } catch {
+              setGlobalMilkOptions([])
+            }
+          } else {
+            setGlobalMilkOptions([])
+          }
           setDefaultTaxRate(Number(settings.default_tax_rate) || 0)
           setMaxOrdersPerSlot(Number(settings.max_orders_per_slot) || 2)
           setVenmoUsername(settings.venmo_username || '')
