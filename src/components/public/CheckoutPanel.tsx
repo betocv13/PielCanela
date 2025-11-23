@@ -51,6 +51,18 @@ export default function CheckoutPanel() {
   const [tax, setTax] = useState(0)
   const total = subtotal + tax
 
+  // Lock body scroll when panel is open
+  useEffect(() => {
+    if (isCartOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isCartOpen])
+
   // Fetch available time slots when panel opens
   useEffect(() => {
     if (isCartOpen && items.length > 0) {
