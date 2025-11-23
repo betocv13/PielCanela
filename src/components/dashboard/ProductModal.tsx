@@ -17,7 +17,6 @@ interface ProductFormData {
   description: string
   category: string
   base_price: number
-  tax_rate: number | null
   sizes: SizeOption[]
   milk_options: MilkOption[]
   addons: AddonOption[]
@@ -65,7 +64,6 @@ export default function ProductModal({
     description: '',
     category: 'coffee',
     base_price: 0,
-    tax_rate: null,
     sizes: [],
     milk_options: [],
     addons: [],
@@ -100,7 +98,6 @@ export default function ProductModal({
         description: product.description || '',
         category: product.category,
         base_price: product.base_price,
-        tax_rate: product.tax_rate,
         sizes: product.sizes,
         milk_options: product.milk_options,
         addons: product.addons,
@@ -147,7 +144,6 @@ export default function ProductModal({
         description: '',
         category: 'coffee',
         base_price: 0,
-        tax_rate: null,
         sizes: [],
         milk_options: [],
         addons: [],
@@ -437,28 +433,6 @@ export default function ProductModal({
                   />
                 </div>
 
-                {/* Tax Rate */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tax Rate (%)
-                  </label>
-                  <p className="text-xs text-gray-500 mb-1">
-                    Leave empty to use default tax rate from settings
-                  </p>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    value={formData.tax_rate ?? ''}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      tax_rate: e.target.value === '' ? null : parseFloat(e.target.value)
-                    })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-brown focus:border-transparent bg-gray-50"
-                    placeholder="Use default"
-                  />
-                </div>
               </div>
             </div>
 

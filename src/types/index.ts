@@ -144,7 +144,6 @@ export interface ProductFormData {
   addons: AddonOption[]
   available: boolean
   image_url?: string | null
-  tax_rate?: number | null  // Per-product tax rate (percentage), null uses default
 }
 
 // API Response types
