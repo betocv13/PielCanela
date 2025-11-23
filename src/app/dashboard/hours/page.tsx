@@ -54,8 +54,14 @@ export default function BusinessHoursPage() {
 
         if (hoursRes.ok) {
           const hoursData = await hoursRes.json()
-          setHours(hoursData.hours)
-          setOriginalHours(JSON.parse(JSON.stringify(hoursData.hours)))
+          // Normalize time format from "HH:MM:SS" to "HH:MM" to match select options
+          const normalizedHours = hoursData.hours.map((day: BusinessHours) => ({
+            ...day,
+            open_time: day.open_time.slice(0, 5),
+            close_time: day.close_time.slice(0, 5),
+          }))
+          setHours(normalizedHours)
+          setOriginalHours(JSON.parse(JSON.stringify(normalizedHours)))
         }
 
         if (settingsRes.ok) {
@@ -147,8 +153,14 @@ export default function BusinessHoursPage() {
 
       if (res.ok) {
         const data = await res.json()
-        setHours(data.hours)
-        setOriginalHours(JSON.parse(JSON.stringify(data.hours)))
+        // Normalize time format from "HH:MM:SS" to "HH:MM" to match select options
+        const normalizedHours = data.hours.map((day: BusinessHours) => ({
+          ...day,
+          open_time: day.open_time.slice(0, 5),
+          close_time: day.close_time.slice(0, 5),
+        }))
+        setHours(normalizedHours)
+        setOriginalHours(JSON.parse(JSON.stringify(normalizedHours)))
         setHasChanges(false)
         setMessage({ type: 'success', text: 'Business hours saved successfully' })
       } else {
