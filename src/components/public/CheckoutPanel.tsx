@@ -51,14 +51,33 @@ export default function CheckoutPanel() {
   const [tax, setTax] = useState(0)
   const total = subtotal + tax
 
-  // Lock body scroll when panel is open
+  // Lock body scroll when panel is open (works on iOS too)
   useEffect(() => {
     if (isCartOpen) {
+      // Save current scroll position
+      const scrollY = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.left = '0'
+      document.body.style.right = '0'
       document.body.style.overflow = 'hidden'
     } else {
+      // Restore scroll position
+      const scrollY = document.body.style.top
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
       document.body.style.overflow = ''
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+      }
     }
     return () => {
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
       document.body.style.overflow = ''
     }
   }, [isCartOpen])
