@@ -144,6 +144,14 @@ export default function OrdersPage() {
     return `${hour12}:${minutes} ${ampm}`
   }
 
+  const formatPickupDate = (pickupDate: string) => {
+    const date = parseISO(pickupDate)
+    if (isToday(date)) {
+      return 'Today'
+    }
+    return format(date, 'EEE') // Returns day name like "Fri", "Sat", etc.
+  }
+
   const getPaymentMethodLabel = (method: string) => {
     switch (method) {
       case 'venmo':
@@ -424,7 +432,7 @@ export default function OrdersPage() {
 
               {/* Order Footer */}
               <div className="px-4 py-3 bg-gray-50 text-xs text-brand-brown/60">
-                <p>Pickup: Today at {formatPickupTime(order.pickup_time)}</p>
+                <p>Pickup: {formatPickupDate(order.pickup_date)} at {formatPickupTime(order.pickup_time)}</p>
                 <p>Ordered {formatOrderedTime(order.created_at)}</p>
               </div>
             </div>
