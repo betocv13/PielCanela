@@ -10,17 +10,18 @@ export default function CartDrawer() {
   const { items, removeItem, updateQuantity, isCartOpen, setIsCartOpen, subtotal, clearCart } = useCart()
   const [showCheckout, setShowCheckout] = useState(false)
 
-  if (!isCartOpen) return null
-
   const handleCheckout = () => {
     setIsCartOpen(false)
     setShowCheckout(true)
   }
 
+  // If cart is closed and checkout is not showing, don't render anything
+  if (!isCartOpen && !showCheckout) return null
+
   return (
     <>
       {/* Cart Drawer */}
-      <div className="fixed inset-0 z-50">
+      {isCartOpen && <div className="fixed inset-0 z-50">
         {/* Backdrop */}
         <div
           className="absolute inset-0 bg-black/50"
@@ -134,7 +135,7 @@ export default function CartDrawer() {
             </div>
           )}
         </div>
-      </div>
+      </div>}
 
       {/* Checkout Modal */}
       <CheckoutModal
