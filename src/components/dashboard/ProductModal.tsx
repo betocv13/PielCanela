@@ -31,7 +31,8 @@ const DEFAULT_SIZES: SizeOption[] = [
   { name: 'Large', size: '24oz', priceAdjustment: 1.50 },
 ]
 
-const DEFAULT_MILK_OPTIONS: MilkOption[] = [
+// Fallback milk options in case settings can't be loaded
+const FALLBACK_MILK_OPTIONS: MilkOption[] = [
   { name: 'Whole Milk', priceAdjustment: 0 },
   { name: 'Oat Milk', priceAdjustment: 0.50 },
   { name: 'Almond Milk', priceAdjustment: 0 },
@@ -57,6 +58,9 @@ export default function ProductModal({
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Global milk options from settings
+  const [globalMilkOptions, setGlobalMilkOptions] = useState<MilkOption[]>(FALLBACK_MILK_OPTIONS)
 
   // Form state
   const [formData, setFormData] = useState<ProductFormData>({
@@ -90,6 +94,28 @@ export default function ProductModal({
     c.charAt(0).toUpperCase() + c.slice(1)
   )]))
 
+  // Fetch global milk options from settings
+  useEffect(() => {
+    const fetchGlobalMilkOptions = async () => {
+      try {
+        const response = await fetch('/api/settings')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.global_milk_options && Array.isArray(data.global_milk_options) && data.global_milk_options.length > 0) {
+            setGlobalMilkOptions(data.global_milk_options)
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch global milk options:', err)
+        // Keep using fallback options
+      }
+    }
+
+    if (isOpen) {
+      fetchGlobalMilkOptions()
+    }
+  }, [isOpen])
+
   // Initialize form when product changes
   useEffect(() => {
     if (product) {
@@ -118,9 +144,9 @@ export default function ProductModal({
       const milkNames = new Set(product.milk_options.map(m => m.name))
       setSelectedMilk(milkNames)
 
-      // Separate custom milk
-      const defaultMilkNames = DEFAULT_MILK_OPTIONS.map(m => m.name)
-      const customM = product.milk_options.filter(m => !defaultMilkNames.includes(m.name))
+      // Separate custom milk (anything not in global options)
+      const globalMilkNames = globalMilkOptions.map(m => m.name)
+      const customM = product.milk_options.filter(m => !globalMilkNames.includes(m.name))
       setCustomMilk(customM)
 
       // Set selected addons
@@ -160,7 +186,7 @@ export default function ProductModal({
       setCustomCategory('')
     }
     setError(null)
-  }, [product, isOpen])
+  }, [product, isOpen, globalMilkOptions])
 
   // Handle image upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -208,9 +234,9 @@ export default function ProductModal({
       }
     })
 
-    // Build milk options array
+    // Build milk options array (using prices from global settings)
     const milk_options: MilkOption[] = []
-    DEFAULT_MILK_OPTIONS.forEach(milk => {
+    globalMilkOptions.forEach(milk => {
       if (selectedMilk.has(milk.name)) {
         milk_options.push(milk)
       }
@@ -561,7 +587,7 @@ export default function ProductModal({
                 Milk Options
               </h3>
               <div className="space-y-2">
-                {DEFAULT_MILK_OPTIONS.map((milk) => (
+                {globalMilkOptions.map((milk) => (
                   <label key={milk.name} className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
