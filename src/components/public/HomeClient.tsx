@@ -7,7 +7,7 @@ import Hero from './Hero'
 import MenuSection from './MenuSection'
 import Footer from './Footer'
 import OrderModal from './OrderModal'
-import CartDrawer from './CartDrawer'
+import CheckoutPanel from './CheckoutPanel'
 
 interface HomeClientProps {
   products: Product[]
@@ -52,8 +52,8 @@ export default function HomeClient({ products }: HomeClientProps) {
         onClose={handleCloseOrderModal}
       />
 
-      {/* Cart Drawer */}
-      <CartDrawer />
+      {/* Checkout Panel */}
+      <CheckoutPanel />
     </div>
   )
 }
