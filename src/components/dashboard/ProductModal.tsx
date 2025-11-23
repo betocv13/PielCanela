@@ -100,8 +100,16 @@ export default function ProductModal({
         const response = await fetch('/api/settings')
         if (response.ok) {
           const data = await response.json()
-          if (data.global_milk_options && Array.isArray(data.global_milk_options) && data.global_milk_options.length > 0) {
-            setGlobalMilkOptions(data.global_milk_options)
+          // API returns { settings: { global_milk_options: [...] } }
+          const milkOptions = data.settings?.global_milk_options
+          if (milkOptions) {
+            // Handle both string and array formats
+            const options = typeof milkOptions === 'string'
+              ? JSON.parse(milkOptions)
+              : milkOptions
+            if (Array.isArray(options) && options.length > 0) {
+              setGlobalMilkOptions(options)
+            }
           }
         }
       } catch (err) {

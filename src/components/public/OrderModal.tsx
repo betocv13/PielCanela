@@ -31,11 +31,12 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
         const response = await fetch('/api/settings')
         if (response.ok) {
           const data = await response.json()
-          if (data.global_milk_options) {
+          // API returns { settings: { global_milk_options: [...] } }
+          if (data.settings?.global_milk_options) {
             // Handle both string and array formats
-            const options = typeof data.global_milk_options === 'string'
-              ? JSON.parse(data.global_milk_options)
-              : data.global_milk_options
+            const options = typeof data.settings.global_milk_options === 'string'
+              ? JSON.parse(data.settings.global_milk_options)
+              : data.settings.global_milk_options
             if (Array.isArray(options)) {
               setGlobalMilkOptions(options)
             }
