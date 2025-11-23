@@ -24,11 +24,10 @@ interface ProductFormData {
   image_url: string | null
 }
 
-// Default options
-const DEFAULT_SIZES: SizeOption[] = [
-  { name: 'Small', size: '16oz', priceAdjustment: 0 },
-  { name: 'Medium', size: '20oz', priceAdjustment: 1.00 },
-  { name: 'Large', size: '24oz', priceAdjustment: 1.50 },
+// Default size templates (prices can be edited per product)
+const DEFAULT_SIZE_TEMPLATES = [
+  { name: '16oz', size: '16oz', price: 4.00 },
+  { name: '20oz', size: '20oz', price: 5.00 },
 ]
 
 // Fallback milk options in case settings can't be loaded
@@ -79,12 +78,13 @@ export default function ProductModal({
   })
 
   // Selected options (for checkboxes)
-  const [selectedSizes, setSelectedSizes] = useState<Set<string>>(new Set(['Small']))
   const [selectedMilk, setSelectedMilk] = useState<Set<string>>(new Set())
   const [selectedAddons, setSelectedAddons] = useState<Set<string>>(new Set())
 
-  // Custom items
-  const [customSizes, setCustomSizes] = useState<SizeOption[]>([])
+  // Product sizes (editable with direct prices)
+  const [productSizes, setProductSizes] = useState<SizeOption[]>([
+    { name: '16oz', size: '16oz', price: 4.00 }
+  ])
 
   // Category state
   const [showCustomCategory, setShowCustomCategory] = useState(false)
@@ -152,14 +152,13 @@ export default function ProductModal({
         image_url: product.image_url,
       })
 
-      // Set selected sizes
-      const sizeNames = new Set(product.sizes.map(s => s.name))
-      setSelectedSizes(sizeNames)
-
-      // Separate custom sizes
-      const defaultSizeNames = DEFAULT_SIZES.map(s => s.name)
-      const custom = product.sizes.filter(s => !defaultSizeNames.includes(s.name))
-      setCustomSizes(custom)
+      // Set product sizes (migrate old priceAdjustment format if needed)
+      const migratedSizes = product.sizes.map(s => ({
+        name: s.name,
+        size: s.size,
+        price: 'price' in s ? s.price : (product.base_price + (s as any).priceAdjustment || 0)
+      }))
+      setProductSizes(migratedSizes.length > 0 ? migratedSizes : [{ name: '16oz', size: '16oz', price: 4.00 }])
 
       // Set selected milk (only select milk options that exist in global settings)
       const globalMilkNames = globalMilkOptions.map(m => m.name)
@@ -189,10 +188,9 @@ export default function ProductModal({
         available: true,
         image_url: null,
       })
-      setSelectedSizes(new Set(['Small']))
+      setProductSizes([{ name: '16oz', size: '16oz', price: 4.00 }])
       setSelectedMilk(new Set())
       setSelectedAddons(new Set())
-      setCustomSizes([])
       setShowCustomCategory(false)
       setCustomCategory('')
     }
@@ -232,19 +230,6 @@ export default function ProductModal({
 
   // Build final data from selections
   const buildFinalData = (): ProductFormData => {
-    // Build sizes array
-    const sizes: SizeOption[] = []
-    DEFAULT_SIZES.forEach(size => {
-      if (selectedSizes.has(size.name)) {
-        sizes.push(size)
-      }
-    })
-    customSizes.forEach(size => {
-      if (selectedSizes.has(size.name)) {
-        sizes.push(size)
-      }
-    })
-
     // Build milk options array (using prices from global settings)
     // Products only store which milk options are available - prices come from global settings
     const milk_options: MilkOption[] = []
@@ -263,10 +248,16 @@ export default function ProductModal({
       }
     })
 
+    // Calculate base_price as the minimum size price (for display purposes)
+    const base_price = productSizes.length > 0
+      ? Math.min(...productSizes.map(s => s.price))
+      : 0
+
     return {
       ...formData,
       category: showCustomCategory ? customCategory : formData.category,
-      sizes,
+      base_price,
+      sizes: productSizes,
       milk_options,
       addons,
     }
@@ -287,11 +278,11 @@ export default function ProductModal({
       if (!finalData.category.trim()) {
         throw new Error('Category is required')
       }
-      if (finalData.base_price <= 0) {
-        throw new Error('Base price must be greater than 0')
-      }
       if (finalData.sizes.length === 0) {
         throw new Error('At least one size is required')
+      }
+      if (finalData.sizes.some(s => s.price <= 0)) {
+        throw new Error('All sizes must have a price greater than 0')
       }
 
       await onSave(finalData)
@@ -303,12 +294,33 @@ export default function ProductModal({
     }
   }
 
-  // Add custom size
-  const addCustomSize = () => {
-    const name = `Custom ${customSizes.length + 1}`
-    const newSize: SizeOption = { name, size: '', priceAdjustment: 0 }
-    setCustomSizes([...customSizes, newSize])
-    setSelectedSizes(new Set([...Array.from(selectedSizes), name]))
+  // Add new size
+  const addSize = () => {
+    // Suggest next logical size based on existing sizes
+    const existingNames = productSizes.map(s => s.name)
+    let newSize: SizeOption
+
+    if (!existingNames.includes('16oz')) {
+      newSize = { name: '16oz', size: '16oz', price: 4.00 }
+    } else if (!existingNames.includes('20oz')) {
+      newSize = { name: '20oz', size: '20oz', price: 5.00 }
+    } else {
+      newSize = { name: 'Custom', size: '', price: 0 }
+    }
+
+    setProductSizes([...productSizes, newSize])
+  }
+
+  // Remove size
+  const removeSize = (index: number) => {
+    setProductSizes(productSizes.filter((_, i) => i !== index))
+  }
+
+  // Update size
+  const updateSize = (index: number, field: keyof SizeOption, value: string | number) => {
+    const newSizes = [...productSizes]
+    newSizes[index] = { ...newSizes[index], [field]: value }
+    setProductSizes(newSizes)
   }
 
 
@@ -430,141 +442,74 @@ export default function ProductModal({
                   )}
                 </div>
 
-                {/* Base Price */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Base Price <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.base_price || ''}
-                    onChange={(e) => setFormData({ ...formData, base_price: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-brown focus:border-transparent bg-gray-50"
-                    placeholder="4.50"
-                    required
-                  />
-                </div>
-
               </div>
             </div>
 
-            {/* Sizes */}
+            {/* Sizes & Prices */}
             <div>
               <h3 className="text-sm font-semibold text-brand-brown uppercase tracking-wide mb-4">
-                Sizes Available
+                Sizes & Prices
               </h3>
-              <div className="space-y-2">
-                {DEFAULT_SIZES.map((size) => (
-                  <label key={size.name} className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedSizes.has(size.name)}
-                      onChange={(e) => {
-                        const newSet = new Set(selectedSizes)
-                        if (e.target.checked) {
-                          newSet.add(size.name)
-                        } else {
-                          newSet.delete(size.name)
-                        }
-                        setSelectedSizes(newSet)
-                      }}
-                      className="w-4 h-4 text-brand-brown border-gray-300 rounded focus:ring-brand-brown"
-                    />
-                    <span className="text-sm text-gray-700">
-                      {size.size} ({size.name}) - {size.priceAdjustment === 0 ? 'Base price' : `+$${size.priceAdjustment.toFixed(2)}`}
-                    </span>
-                  </label>
-                ))}
-                {customSizes.map((size, idx) => (
-                  <div key={idx} className="border border-gray-200 rounded-lg p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="flex items-center gap-2">
+              <div className="space-y-3">
+                {productSizes.map((size, idx) => (
+                  <div key={idx} className="border border-gray-200 rounded-lg p-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 items-end">
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Name</label>
                         <input
-                          type="checkbox"
-                          checked={selectedSizes.has(size.name)}
-                          onChange={(e) => {
-                            const newSet = new Set(selectedSizes)
-                            if (e.target.checked) {
-                              newSet.add(size.name)
-                            } else {
-                              newSet.delete(size.name)
-                            }
-                            setSelectedSizes(newSet)
-                          }}
-                          className="w-4 h-4 text-brand-brown border-gray-300 rounded focus:ring-brand-brown"
+                          type="text"
+                          value={size.name}
+                          onChange={(e) => updateSize(idx, 'name', e.target.value)}
+                          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-brown"
+                          placeholder="16oz"
                         />
-                        <span className="text-sm font-medium text-gray-700">Custom Size</span>
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newSet = new Set(selectedSizes)
-                          newSet.delete(size.name)
-                          setSelectedSizes(newSet)
-                          setCustomSizes(customSizes.filter((_, i) => i !== idx))
-                        }}
-                        className="p-1 text-red-500 hover:bg-red-50 rounded"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      <input
-                        type="text"
-                        value={size.name}
-                        onChange={(e) => {
-                          const oldName = size.name
-                          const newSizes = [...customSizes]
-                          newSizes[idx] = { ...newSizes[idx], name: e.target.value }
-                          setCustomSizes(newSizes)
-                          // Update selected set
-                          const newSet = new Set(selectedSizes)
-                          newSet.delete(oldName)
-                          newSet.add(e.target.value)
-                          setSelectedSizes(newSet)
-                        }}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                        placeholder="Name"
-                      />
-                      <input
-                        type="text"
-                        value={size.size}
-                        onChange={(e) => {
-                          const newSizes = [...customSizes]
-                          newSizes[idx] = { ...newSizes[idx], size: e.target.value }
-                          setCustomSizes(newSizes)
-                        }}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                        placeholder="Size (e.g. 16oz)"
-                      />
-                      <div className="flex items-center gap-1">
-                        <span className="text-sm text-gray-500">+$</span>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Size</label>
                         <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={size.priceAdjustment}
-                          onChange={(e) => {
-                            const newSizes = [...customSizes]
-                            newSizes[idx] = { ...newSizes[idx], priceAdjustment: parseFloat(e.target.value) || 0 }
-                            setCustomSizes(newSizes)
-                          }}
-                          className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
-                          placeholder="0.00"
+                          type="text"
+                          value={size.size}
+                          onChange={(e) => updateSize(idx, 'size', e.target.value)}
+                          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-brown"
+                          placeholder="16oz"
                         />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Price</label>
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm text-gray-500">$</span>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={size.price || ''}
+                            onChange={(e) => updateSize(idx, 'price', parseFloat(e.target.value) || 0)}
+                            className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-brown"
+                            placeholder="4.00"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        {productSizes.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeSize(idx)}
+                            className="p-1.5 text-red-500 hover:bg-red-50 rounded"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
                 ))}
                 <button
                   type="button"
-                  onClick={addCustomSize}
-                  className="flex items-center gap-1 text-sm text-brand-brown hover:text-brand-brown/80 mt-2"
+                  onClick={addSize}
+                  className="flex items-center gap-1 text-sm text-brand-brown hover:text-brand-brown/80"
                 >
                   <Plus className="w-4 h-4" />
-                  Add custom size
+                  Add size
                 </button>
               </div>
             </div>

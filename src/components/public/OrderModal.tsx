@@ -119,12 +119,18 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
 
   // Calculate total price
   const calculateTotal = () => {
-    let total = product.base_price
+    let total = 0
 
-    // Add size adjustment
+    // Get size price (direct pricing)
     if (selectedSize && product.sizes) {
       const size = product.sizes.find(s => s.name === selectedSize)
-      if (size) total += size.priceAdjustment
+      if (size) {
+        // Support both old (priceAdjustment) and new (price) format
+        total = 'price' in size ? size.price : (product.base_price + ((size as any).priceAdjustment || 0))
+      }
+    } else {
+      // Fallback to base_price if no size selected
+      total = product.base_price
     }
 
     // Add milk adjustment (use global settings price)
@@ -217,24 +223,26 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
             <div className="mb-4">
               <h3 className="font-medium text-brand-brown mb-2">Size</h3>
               <div className="grid grid-cols-3 gap-2">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size.name}
-                    onClick={() => setSelectedSize(size.name)}
-                    className={`py-2 px-3 rounded-lg border-2 text-sm transition-all ${
-                      selectedSize === size.name
-                        ? 'border-brand-brown bg-brand-cream'
-                        : 'border-gray-200 hover:border-brand-brown/50'
-                    }`}
-                  >
-                    <div className="font-medium">{size.name}</div>
-                    {size.priceAdjustment !== 0 && (
+                {product.sizes.map((size) => {
+                  // Support both old and new price format
+                  const sizePrice = 'price' in size ? size.price : (product.base_price + ((size as any).priceAdjustment || 0))
+                  return (
+                    <button
+                      key={size.name}
+                      onClick={() => setSelectedSize(size.name)}
+                      className={`py-2 px-3 rounded-lg border-2 text-sm transition-all ${
+                        selectedSize === size.name
+                          ? 'border-brand-brown bg-brand-cream'
+                          : 'border-gray-200 hover:border-brand-brown/50'
+                      }`}
+                    >
+                      <div className="font-medium">{size.name}</div>
                       <div className="text-xs text-gray-500">
-                        {size.priceAdjustment > 0 ? '+' : ''}{formatPrice(size.priceAdjustment)}
+                        {formatPrice(sizePrice)}
                       </div>
-                    )}
-                  </button>
-                ))}
+                    </button>
+                  )
+                })}
               </div>
             </div>
           )}

@@ -136,7 +136,7 @@ export default function MenuManagementPage() {
     description: string
     category: string
     base_price: number
-    sizes: { name: string; size: string; priceAdjustment: number }[]
+    sizes: { name: string; size: string; price: number }[]
     milk_options: { name: string; priceAdjustment: number }[]
     addons: { name: string; priceAdjustment: number }[]
     available: boolean

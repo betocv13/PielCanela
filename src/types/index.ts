@@ -4,7 +4,7 @@
 export interface SizeOption {
   name: string
   size: string
-  priceAdjustment: number
+  price: number
 }
 
 // Milk option for products
