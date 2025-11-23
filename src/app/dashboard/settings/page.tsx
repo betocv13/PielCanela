@@ -48,11 +48,12 @@ export default function SettingsPage() {
           const data = await res.json()
           const settings = data.settings
 
-          // Parse settings - handle JSON string or array
+          // Parse settings - value column is JSONB so it returns proper types
           const milkOptions = settings.global_milk_options
           if (Array.isArray(milkOptions)) {
             setGlobalMilkOptions(milkOptions)
           } else if (typeof milkOptions === 'string') {
+            // Fallback for legacy data that may have been double-stringified
             try {
               const parsed = JSON.parse(milkOptions)
               setGlobalMilkOptions(Array.isArray(parsed) ? parsed : [])
@@ -60,6 +61,7 @@ export default function SettingsPage() {
               setGlobalMilkOptions([])
             }
           } else {
+            // No milk options in database - start with empty array
             setGlobalMilkOptions([])
           }
           setDefaultTaxRate(Number(settings.default_tax_rate) || 0)

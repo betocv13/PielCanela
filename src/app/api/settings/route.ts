@@ -84,9 +84,10 @@ export async function PATCH(request: Request) {
     }
 
     // Update the setting
+    // Note: value column is JSONB, so we pass the value directly (no JSON.stringify)
     const { data: setting, error } = await supabase
       .from('settings')
-      .update({ value: JSON.stringify(value) })
+      .update({ value })
       .eq('key', key)
       .select()
       .single()
