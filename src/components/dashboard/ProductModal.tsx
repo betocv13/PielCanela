@@ -62,6 +62,9 @@ export default function ProductModal({
   // Global milk options from settings
   const [globalMilkOptions, setGlobalMilkOptions] = useState<MilkOption[]>(FALLBACK_MILK_OPTIONS)
 
+  // Global addon options from settings
+  const [globalAddonOptions, setGlobalAddonOptions] = useState<AddonOption[]>(DEFAULT_ADDONS)
+
   // Form state
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
@@ -82,7 +85,6 @@ export default function ProductModal({
 
   // Custom items
   const [customSizes, setCustomSizes] = useState<SizeOption[]>([])
-  const [customAddons, setCustomAddons] = useState<AddonOption[]>([])
 
   // Category state
   const [showCustomCategory, setShowCustomCategory] = useState(false)
@@ -93,17 +95,18 @@ export default function ProductModal({
     c.charAt(0).toUpperCase() + c.slice(1)
   )]))
 
-  // Fetch global milk options from settings
+  // Fetch global options from settings
   useEffect(() => {
-    const fetchGlobalMilkOptions = async () => {
+    const fetchGlobalOptions = async () => {
       try {
         const response = await fetch('/api/settings')
         if (response.ok) {
           const data = await response.json()
-          // API returns { settings: { global_milk_options: [...] } }
+          // API returns { settings: { global_milk_options: [...], global_addon_options: [...] } }
+
+          // Fetch milk options
           const milkOptions = data.settings?.global_milk_options
           if (milkOptions) {
-            // Handle both string and array formats
             const options = typeof milkOptions === 'string'
               ? JSON.parse(milkOptions)
               : milkOptions
@@ -111,15 +114,26 @@ export default function ProductModal({
               setGlobalMilkOptions(options)
             }
           }
+
+          // Fetch addon options
+          const addonOptions = data.settings?.global_addon_options
+          if (addonOptions) {
+            const options = typeof addonOptions === 'string'
+              ? JSON.parse(addonOptions)
+              : addonOptions
+            if (Array.isArray(options) && options.length > 0) {
+              setGlobalAddonOptions(options)
+            }
+          }
         }
       } catch (err) {
-        console.error('Failed to fetch global milk options:', err)
+        console.error('Failed to fetch global options:', err)
         // Keep using fallback options
       }
     }
 
     if (isOpen) {
-      fetchGlobalMilkOptions()
+      fetchGlobalOptions()
     }
   }, [isOpen])
 
@@ -152,14 +166,10 @@ export default function ProductModal({
       const milkNames = new Set(product.milk_options.map(m => m.name).filter(name => globalMilkNames.includes(name)))
       setSelectedMilk(milkNames)
 
-      // Set selected addons
-      const addonNames = new Set(product.addons.map(a => a.name))
+      // Set selected addons (only select addons that exist in global settings)
+      const globalAddonNames = globalAddonOptions.map(a => a.name)
+      const addonNames = new Set(product.addons.map(a => a.name).filter(name => globalAddonNames.includes(name)))
       setSelectedAddons(addonNames)
-
-      // Separate custom addons
-      const defaultAddonNames = DEFAULT_ADDONS.map(a => a.name)
-      const customA = product.addons.filter(a => !defaultAddonNames.includes(a.name))
-      setCustomAddons(customA)
 
       // Check if category is custom
       if (!allCategories.map(c => c.toLowerCase()).includes(product.category.toLowerCase())) {
@@ -183,12 +193,11 @@ export default function ProductModal({
       setSelectedMilk(new Set())
       setSelectedAddons(new Set())
       setCustomSizes([])
-      setCustomAddons([])
       setShowCustomCategory(false)
       setCustomCategory('')
     }
     setError(null)
-  }, [product, isOpen, globalMilkOptions])
+  }, [product, isOpen, globalMilkOptions, globalAddonOptions])
 
   // Handle image upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -245,14 +254,10 @@ export default function ProductModal({
       }
     })
 
-    // Build addons array
+    // Build addons array (using prices from global settings)
+    // Products only store which addons are available - prices come from global settings
     const addons: AddonOption[] = []
-    DEFAULT_ADDONS.forEach(addon => {
-      if (selectedAddons.has(addon.name)) {
-        addons.push(addon)
-      }
-    })
-    customAddons.forEach(addon => {
+    globalAddonOptions.forEach(addon => {
       if (selectedAddons.has(addon.name)) {
         addons.push(addon)
       }
@@ -306,13 +311,6 @@ export default function ProductModal({
     setSelectedSizes(new Set([...Array.from(selectedSizes), name]))
   }
 
-  // Add custom addon
-  const addCustomAddon = () => {
-    const name = `Custom Add-on ${customAddons.length + 1}`
-    const newAddon: AddonOption = { name, priceAdjustment: 0 }
-    setCustomAddons([...customAddons, newAddon])
-    setSelectedAddons(new Set([...Array.from(selectedAddons), name]))
-  }
 
   if (!isOpen) return null
 
@@ -610,7 +608,7 @@ export default function ProductModal({
                 Add-ons
               </h3>
               <div className="space-y-2">
-                {DEFAULT_ADDONS.map((addon) => (
+                {globalAddonOptions.map((addon) => (
                   <label key={addon.name} className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
@@ -631,83 +629,9 @@ export default function ProductModal({
                     </span>
                   </label>
                 ))}
-                {customAddons.map((addon, idx) => (
-                  <div key={idx} className="border border-gray-200 rounded-lg p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedAddons.has(addon.name)}
-                          onChange={(e) => {
-                            const newSet = new Set(selectedAddons)
-                            if (e.target.checked) {
-                              newSet.add(addon.name)
-                            } else {
-                              newSet.delete(addon.name)
-                            }
-                            setSelectedAddons(newSet)
-                          }}
-                          className="w-4 h-4 text-brand-brown border-gray-300 rounded focus:ring-brand-brown"
-                        />
-                        <span className="text-sm font-medium text-gray-700">Custom Add-on</span>
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newSet = new Set(selectedAddons)
-                          newSet.delete(addon.name)
-                          setSelectedAddons(newSet)
-                          setCustomAddons(customAddons.filter((_, i) => i !== idx))
-                        }}
-                        className="p-1 text-red-500 hover:bg-red-50 rounded"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <input
-                        type="text"
-                        value={addon.name}
-                        onChange={(e) => {
-                          const oldName = addon.name
-                          const newAddons = [...customAddons]
-                          newAddons[idx] = { ...newAddons[idx], name: e.target.value }
-                          setCustomAddons(newAddons)
-                          const newSet = new Set(selectedAddons)
-                          newSet.delete(oldName)
-                          newSet.add(e.target.value)
-                          setSelectedAddons(newSet)
-                        }}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                        placeholder="Name"
-                      />
-                      <div className="flex items-center gap-1">
-                        <span className="text-sm text-gray-500">+$</span>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={addon.priceAdjustment}
-                          onChange={(e) => {
-                            const newAddons = [...customAddons]
-                            newAddons[idx] = { ...newAddons[idx], priceAdjustment: parseFloat(e.target.value) || 0 }
-                            setCustomAddons(newAddons)
-                          }}
-                          className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
-                          placeholder="0.00"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={addCustomAddon}
-                  className="flex items-center gap-1 text-sm text-brand-brown hover:text-brand-brown/80 mt-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add custom add-on
-                </button>
+                <p className="text-xs text-gray-500 mt-2">
+                  Add-on options and prices are managed in Settings
+                </p>
               </div>
             </div>
 

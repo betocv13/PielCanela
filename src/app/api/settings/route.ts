@@ -72,6 +72,7 @@ export async function PATCH(request: Request) {
       'owner_email',
       'notification_frequency',
       'global_milk_options',
+      'global_addon_options',
       'default_tax_rate',
       'max_orders_per_slot'
     ]

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { X, Plus, Minus } from 'lucide-react'
-import { Product, CartItem, MilkOption } from '@/types'
+import { Product, CartItem, MilkOption, AddonOption } from '@/types'
 import { useCart } from '@/components/providers/CartProvider'
 import { formatPrice } from '@/lib/utils'
 
@@ -21,19 +21,21 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
   const [quantity, setQuantity] = useState(1)
   const [specialInstructions, setSpecialInstructions] = useState('')
 
-  // Global milk options from settings (single source of truth for prices)
+  // Global options from settings (single source of truth for prices)
   const [globalMilkOptions, setGlobalMilkOptions] = useState<MilkOption[]>([])
+  const [globalAddonOptions, setGlobalAddonOptions] = useState<AddonOption[]>([])
 
-  // Fetch global milk options from settings
+  // Fetch global options from settings
   useEffect(() => {
-    const fetchGlobalMilkOptions = async () => {
+    const fetchGlobalOptions = async () => {
       try {
         const response = await fetch('/api/settings')
         if (response.ok) {
           const data = await response.json()
-          // API returns { settings: { global_milk_options: [...] } }
+          // API returns { settings: { global_milk_options: [...], global_addon_options: [...] } }
+
+          // Fetch milk options
           if (data.settings?.global_milk_options) {
-            // Handle both string and array formats
             const options = typeof data.settings.global_milk_options === 'string'
               ? JSON.parse(data.settings.global_milk_options)
               : data.settings.global_milk_options
@@ -41,14 +43,24 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
               setGlobalMilkOptions(options)
             }
           }
+
+          // Fetch addon options
+          if (data.settings?.global_addon_options) {
+            const options = typeof data.settings.global_addon_options === 'string'
+              ? JSON.parse(data.settings.global_addon_options)
+              : data.settings.global_addon_options
+            if (Array.isArray(options)) {
+              setGlobalAddonOptions(options)
+            }
+          }
         }
       } catch (err) {
-        console.error('Failed to fetch global milk options:', err)
+        console.error('Failed to fetch global options:', err)
       }
     }
 
     if (isOpen) {
-      fetchGlobalMilkOptions()
+      fetchGlobalOptions()
     }
   }, [isOpen])
 
@@ -93,6 +105,18 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
     return globalMilkOptions.filter(milk => productMilkNames.includes(milk.name))
   }
 
+  // Get available addon options for this product (filtered from global settings)
+  const getAvailableAddonOptions = () => {
+    if (!product.addons || product.addons.length === 0) return []
+
+    // Get the addon names that this product has enabled
+    const productAddonNames = product.addons.map(a => a.name)
+
+    // Filter global addon options to only show ones this product has
+    // Use global prices as single source of truth
+    return globalAddonOptions.filter(addon => productAddonNames.includes(addon.name))
+  }
+
   // Calculate total price
   const calculateTotal = () => {
     let total = product.base_price
@@ -109,10 +133,10 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
       if (milk) total += milk.priceAdjustment
     }
 
-    // Add addon adjustments
-    if (selectedAddons.length > 0 && product.addons) {
+    // Add addon adjustments (use global settings price)
+    if (selectedAddons.length > 0) {
       selectedAddons.forEach(addonName => {
-        const addon = product.addons.find(a => a.name === addonName)
+        const addon = globalAddonOptions.find(a => a.name === addonName)
         if (addon) total += addon.priceAdjustment
       })
     }
@@ -246,29 +270,32 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
           })()}
 
           {/* Addons */}
-          {product.addons && product.addons.length > 0 && (
-            <div className="mb-4">
-              <h3 className="font-medium text-brand-brown mb-2">Add-ons</h3>
-              <div className="space-y-2">
-                {product.addons.map((addon) => (
-                  <button
-                    key={addon.name}
-                    onClick={() => handleAddonToggle(addon.name)}
-                    className={`w-full flex items-center justify-between py-2 px-3 rounded-lg border-2 text-sm transition-all ${
-                      selectedAddons.includes(addon.name)
-                        ? 'border-brand-brown bg-brand-cream'
-                        : 'border-gray-200 hover:border-brand-brown/50'
-                    }`}
-                  >
-                    <span>{addon.name}</span>
-                    <span className="text-gray-500">
-                      +{formatPrice(addon.priceAdjustment)}
-                    </span>
-                  </button>
-                ))}
+          {(() => {
+            const availableAddonOptions = getAvailableAddonOptions()
+            return availableAddonOptions.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-medium text-brand-brown mb-2">Add-ons</h3>
+                <div className="space-y-2">
+                  {availableAddonOptions.map((addon) => (
+                    <button
+                      key={addon.name}
+                      onClick={() => handleAddonToggle(addon.name)}
+                      className={`w-full flex items-center justify-between py-2 px-3 rounded-lg border-2 text-sm transition-all ${
+                        selectedAddons.includes(addon.name)
+                          ? 'border-brand-brown bg-brand-cream'
+                          : 'border-gray-200 hover:border-brand-brown/50'
+                      }`}
+                    >
+                      <span>{addon.name}</span>
+                      <span className="text-gray-500">
+                        +{formatPrice(addon.priceAdjustment)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )
+          })()}
 
           {/* Special instructions */}
           <div className="mb-4">

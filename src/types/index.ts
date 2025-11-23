@@ -107,6 +107,7 @@ export interface AppSettings {
   owner_email: string
   notification_frequency: 'instant' | 'batched' | 'daily'
   global_milk_options: MilkOption[]
+  global_addon_options: AddonOption[]
   default_tax_rate: number
   max_orders_per_slot: number
 }

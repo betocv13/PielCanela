@@ -13,12 +13,13 @@ import {
   X
 } from 'lucide-react'
 import Image from 'next/image'
-import type { MilkOption } from '@/types'
+import type { MilkOption, AddonOption } from '@/types'
 import { createClient } from '@/lib/supabase/client'
 
 export default function SettingsPage() {
   // Settings state
   const [globalMilkOptions, setGlobalMilkOptions] = useState<MilkOption[]>([])
+  const [globalAddonOptions, setGlobalAddonOptions] = useState<AddonOption[]>([])
   const [defaultTaxRate, setDefaultTaxRate] = useState<number>(0)
   const [maxOrdersPerSlot, setMaxOrdersPerSlot] = useState<number>(2)
   const [venmoUsername, setVenmoUsername] = useState<string>('')
@@ -34,6 +35,8 @@ export default function SettingsPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [newMilkName, setNewMilkName] = useState('')
   const [newMilkPrice, setNewMilkPrice] = useState('')
+  const [newAddonName, setNewAddonName] = useState('')
+  const [newAddonPrice, setNewAddonPrice] = useState('')
 
   // Refs for file inputs
   const venmoFileRef = useRef<HTMLInputElement>(null)
@@ -64,6 +67,22 @@ export default function SettingsPage() {
             // No milk options in database - start with empty array
             setGlobalMilkOptions([])
           }
+
+          // Parse addon options
+          const addonOptions = settings.global_addon_options
+          if (Array.isArray(addonOptions)) {
+            setGlobalAddonOptions(addonOptions)
+          } else if (typeof addonOptions === 'string') {
+            try {
+              const parsed = JSON.parse(addonOptions)
+              setGlobalAddonOptions(Array.isArray(parsed) ? parsed : [])
+            } catch {
+              setGlobalAddonOptions([])
+            }
+          } else {
+            setGlobalAddonOptions([])
+          }
+
           setDefaultTaxRate(Number(settings.default_tax_rate) || 0)
           setMaxOrdersPerSlot(Number(settings.max_orders_per_slot) || 2)
           setVenmoUsername(settings.venmo_username || '')
@@ -100,6 +119,7 @@ export default function SettingsPage() {
     try {
       const results = await Promise.all([
         saveSetting('global_milk_options', globalMilkOptions),
+        saveSetting('global_addon_options', globalAddonOptions),
         saveSetting('default_tax_rate', defaultTaxRate),
         saveSetting('max_orders_per_slot', maxOrdersPerSlot),
         saveSetting('venmo_username', venmoUsername),
@@ -140,6 +160,33 @@ export default function SettingsPage() {
   // Update milk option price
   function handleUpdateMilkPrice(index: number, price: string) {
     setGlobalMilkOptions(prev =>
+      prev.map((option, i) =>
+        i === index ? { ...option, priceAdjustment: parseFloat(price) || 0 } : option
+      )
+    )
+  }
+
+  // Add new addon option
+  function handleAddAddonOption() {
+    if (!newAddonName.trim()) return
+
+    const priceAdjustment = parseFloat(newAddonPrice) || 0
+    setGlobalAddonOptions(prev => [
+      ...prev,
+      { name: newAddonName.trim(), priceAdjustment }
+    ])
+    setNewAddonName('')
+    setNewAddonPrice('')
+  }
+
+  // Remove addon option
+  function handleRemoveAddonOption(index: number) {
+    setGlobalAddonOptions(prev => prev.filter((_, i) => i !== index))
+  }
+
+  // Update addon option price
+  function handleUpdateAddonPrice(index: number, price: string) {
+    setGlobalAddonOptions(prev =>
       prev.map((option, i) =>
         i === index ? { ...option, priceAdjustment: parseFloat(price) || 0 } : option
       )
@@ -295,6 +342,76 @@ export default function SettingsPage() {
           <button
             onClick={handleAddMilkOption}
             disabled={!newMilkName.trim()}
+            className="p-2 bg-brand-brown text-white rounded-lg hover:bg-brand-brown/90
+              disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Plus className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Global Add-on Options */}
+      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <h2 className="text-lg font-heading text-brand-brown mb-4 flex items-center gap-2">
+          <Plus className="w-5 h-5 text-brand-green" />
+          Global Add-on Prices
+        </h2>
+        <p className="text-sm text-brand-brown/70 mb-4">
+          These prices apply to all products. Individual products can have different add-ons available.
+        </p>
+
+        <div className="space-y-3 mb-4">
+          {globalAddonOptions.map((option, index) => (
+            <div key={index} className="flex items-center gap-3">
+              <span className="flex-1 text-brand-brown">{option.name}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-brand-brown/60">$</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={option.priceAdjustment}
+                  onChange={(e) => handleUpdateAddonPrice(index, e.target.value)}
+                  className="w-20 px-2 py-1 border border-gray-200 rounded text-right
+                    focus:outline-none focus:ring-2 focus:ring-brand-brown/20"
+                />
+              </div>
+              <button
+                onClick={() => handleRemoveAddonOption(index)}
+                className="p-1 text-red-500 hover:bg-red-50 rounded"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Add new addon option */}
+        <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+          <input
+            type="text"
+            placeholder="Add-on name"
+            value={newAddonName}
+            onChange={(e) => setNewAddonName(e.target.value)}
+            className="flex-1 px-3 py-2 border border-gray-200 rounded-lg
+              focus:outline-none focus:ring-2 focus:ring-brand-brown/20"
+          />
+          <div className="flex items-center gap-1">
+            <span className="text-brand-brown/60">$</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              value={newAddonPrice}
+              onChange={(e) => setNewAddonPrice(e.target.value)}
+              className="w-20 px-2 py-2 border border-gray-200 rounded-lg text-right
+                focus:outline-none focus:ring-2 focus:ring-brand-brown/20"
+            />
+          </div>
+          <button
+            onClick={handleAddAddonOption}
+            disabled={!newAddonName.trim()}
             className="p-2 bg-brand-brown text-white rounded-lg hover:bg-brand-brown/90
               disabled:opacity-50 disabled:cursor-not-allowed"
           >
