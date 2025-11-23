@@ -76,13 +76,23 @@ export interface Order {
   completed_at: string | null
 }
 
-// Business hours type
+// Business hours type (legacy - kept for backwards compatibility)
 export interface BusinessHours {
   id: string
   day_of_week: number
   is_open: boolean
   open_time: string
   close_time: string
+  created_at: string
+  updated_at: string
+}
+
+// Pickup date type (new date-specific scheduling)
+export interface PickupDate {
+  id: string
+  date: string  // YYYY-MM-DD format
+  open_time: string  // HH:MM format
+  close_time: string  // HH:MM format
   created_at: string
   updated_at: string
 }
@@ -171,6 +181,10 @@ export interface BusinessHoursResponse {
   hours: BusinessHours[]
   ordering_enabled: boolean
   closed_message: string
+}
+
+export interface PickupDatesResponse {
+  dates: PickupDate[]
 }
 
 export interface AvailableTimesResponse {
