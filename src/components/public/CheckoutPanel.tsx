@@ -525,7 +525,7 @@ export default function CheckoutPanel() {
 
         {/* Sticky Footer */}
         {items.length > 0 && (
-          <div className="flex-shrink-0 border-t bg-white p-4 space-y-3">
+          <div className="flex-shrink-0 border-t bg-brand-cream/50 p-4 space-y-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
             {/* Totals */}
             <div className="space-y-1">
               <div className="flex justify-between text-sm">
