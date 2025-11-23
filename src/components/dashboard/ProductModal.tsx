@@ -24,12 +24,6 @@ interface ProductFormData {
   image_url: string | null
 }
 
-// Default size templates (prices can be edited per product)
-const DEFAULT_SIZE_TEMPLATES = [
-  { name: '16oz', size: '16oz', price: 4.00 },
-  { name: '20oz', size: '20oz', price: 5.00 },
-]
-
 // Fallback milk options in case settings can't be loaded
 const FALLBACK_MILK_OPTIONS: MilkOption[] = [
   { name: 'Whole Milk', priceAdjustment: 0 },
@@ -156,7 +150,7 @@ export default function ProductModal({
       const migratedSizes = product.sizes.map(s => ({
         name: s.name,
         size: s.size,
-        price: 'price' in s ? s.price : (product.base_price + (s as any).priceAdjustment || 0)
+        price: 'price' in s ? s.price : (product.base_price + ((s as { priceAdjustment?: number }).priceAdjustment || 0))
       }))
       setProductSizes(migratedSizes.length > 0 ? migratedSizes : [{ name: '16oz', size: '16oz', price: 4.00 }])
 

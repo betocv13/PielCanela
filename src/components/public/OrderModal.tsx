@@ -126,7 +126,7 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
       const size = product.sizes.find(s => s.name === selectedSize)
       if (size) {
         // Support both old (priceAdjustment) and new (price) format
-        total = 'price' in size ? size.price : (product.base_price + ((size as any).priceAdjustment || 0))
+        total = 'price' in size ? size.price : (product.base_price + (((size as { priceAdjustment?: number }).priceAdjustment) || 0))
       }
     } else {
       // Fallback to base_price if no size selected
@@ -225,7 +225,7 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
               <div className="grid grid-cols-3 gap-2">
                 {product.sizes.map((size) => {
                   // Support both old and new price format
-                  const sizePrice = 'price' in size ? size.price : (product.base_price + ((size as any).priceAdjustment || 0))
+                  const sizePrice = 'price' in size ? size.price : (product.base_price + (((size as { priceAdjustment?: number }).priceAdjustment) || 0))
                   return (
                     <button
                       key={size.name}
