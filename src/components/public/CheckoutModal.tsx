@@ -17,6 +17,16 @@ interface AvailableSlot {
   slots: string[]
 }
 
+// Format 24-hour time to 12-hour format (e.g., "20:30" -> "8:30 PM")
+const formatTime12Hour = (time: string): string => {
+  const [hourStr, minuteStr] = time.split(':')
+  let hour = parseInt(hourStr, 10)
+  const minute = minuteStr || '00'
+  const ampm = hour >= 12 ? 'PM' : 'AM'
+  hour = hour % 12 || 12
+  return minute === '00' ? `${hour} ${ampm}` : `${hour}:${minute} ${ampm}`
+}
+
 export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const { items, subtotal, clearCart } = useCart()
   const [step, setStep] = useState(1)
@@ -309,7 +319,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           : 'border-gray-200 hover:border-brand-brown/50'
                       }`}
                     >
-                      {time}
+                      {formatTime12Hour(time)}
                     </button>
                   ))}
                 </div>
