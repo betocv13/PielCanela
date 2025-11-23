@@ -86,7 +86,7 @@ export default function OrdersPage() {
       case 'completed':
         return order.status === 'completed'
       default:
-        return true
+        return order.status !== 'completed' // All Orders shows only active orders
     }
   })
 
