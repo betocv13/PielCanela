@@ -106,7 +106,11 @@ export default function CheckoutPanel() {
       for (let i = 0; i < 7; i++) {
         const date = new Date(today)
         date.setDate(date.getDate() + i)
-        const dateStr = date.toISOString().split('T')[0]
+        // Use local timezone for date string (not UTC)
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        const dateStr = `${year}-${month}-${day}`
 
         const res = await fetch(`/api/orders/available-slots?date=${dateStr}`)
         if (res.ok) {

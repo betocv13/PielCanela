@@ -88,7 +88,11 @@ export async function GET(request: Request) {
 
     // Also filter out slots that are in the past (for today)
     const now = new Date()
-    const today = now.toISOString().split('T')[0]
+    // Use local timezone for date comparison (not UTC)
+    const todayYear = now.getFullYear()
+    const todayMonth = String(now.getMonth() + 1).padStart(2, '0')
+    const todayDay = String(now.getDate()).padStart(2, '0')
+    const today = `${todayYear}-${todayMonth}-${todayDay}`
 
     const filteredSlots = date === today
       ? availableSlots.filter(slot => {
