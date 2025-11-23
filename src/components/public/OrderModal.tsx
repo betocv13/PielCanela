@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { X, Plus, Minus } from 'lucide-react'
-import { Product, CartItem } from '@/types'
+import { Product, CartItem, MilkOption } from '@/types'
 import { useCart } from '@/components/providers/CartProvider'
 import { formatPrice } from '@/lib/utils'
 
@@ -21,6 +21,36 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
   const [quantity, setQuantity] = useState(1)
   const [specialInstructions, setSpecialInstructions] = useState('')
 
+  // Global milk options from settings (single source of truth for prices)
+  const [globalMilkOptions, setGlobalMilkOptions] = useState<MilkOption[]>([])
+
+  // Fetch global milk options from settings
+  useEffect(() => {
+    const fetchGlobalMilkOptions = async () => {
+      try {
+        const response = await fetch('/api/settings')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.global_milk_options) {
+            // Handle both string and array formats
+            const options = typeof data.global_milk_options === 'string'
+              ? JSON.parse(data.global_milk_options)
+              : data.global_milk_options
+            if (Array.isArray(options)) {
+              setGlobalMilkOptions(options)
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch global milk options:', err)
+      }
+    }
+
+    if (isOpen) {
+      fetchGlobalMilkOptions()
+    }
+  }, [isOpen])
+
   // Reset selections when product changes
   useEffect(() => {
     if (product) {
@@ -31,7 +61,13 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
         setSelectedSize(null)
       }
       // Set default milk if available
-      if (product.milk_options && product.milk_options.length > 0) {
+      // Find first product milk option that exists in global options
+      if (product.milk_options && product.milk_options.length > 0 && globalMilkOptions.length > 0) {
+        const productMilkNames = product.milk_options.map(m => m.name)
+        const firstAvailable = globalMilkOptions.find(m => productMilkNames.includes(m.name))
+        setSelectedMilk(firstAvailable ? firstAvailable.name : null)
+      } else if (product.milk_options && product.milk_options.length > 0) {
+        // Fallback to product milk option if global not loaded yet
         setSelectedMilk(product.milk_options[0].name)
       } else {
         setSelectedMilk(null)
@@ -40,9 +76,21 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
       setQuantity(1)
       setSpecialInstructions('')
     }
-  }, [product])
+  }, [product, globalMilkOptions])
 
   if (!isOpen || !product) return null
+
+  // Get available milk options for this product (filtered from global settings)
+  const getAvailableMilkOptions = () => {
+    if (!product.milk_options || product.milk_options.length === 0) return []
+
+    // Get the milk names that this product has enabled
+    const productMilkNames = product.milk_options.map(m => m.name)
+
+    // Filter global milk options to only show ones this product has
+    // Use global prices as single source of truth
+    return globalMilkOptions.filter(milk => productMilkNames.includes(milk.name))
+  }
 
   // Calculate total price
   const calculateTotal = () => {
@@ -54,9 +102,9 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
       if (size) total += size.priceAdjustment
     }
 
-    // Add milk adjustment
-    if (selectedMilk && product.milk_options) {
-      const milk = product.milk_options.find(m => m.name === selectedMilk)
+    // Add milk adjustment (use global settings price)
+    if (selectedMilk) {
+      const milk = globalMilkOptions.find(m => m.name === selectedMilk)
       if (milk) total += milk.priceAdjustment
     }
 
@@ -167,31 +215,34 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
           )}
 
           {/* Milk selection */}
-          {product.milk_options && product.milk_options.length > 0 && (
-            <div className="mb-4">
-              <h3 className="font-medium text-brand-brown mb-2">Milk</h3>
-              <div className="space-y-2">
-                {product.milk_options.map((milk) => (
-                  <button
-                    key={milk.name}
-                    onClick={() => setSelectedMilk(milk.name)}
-                    className={`w-full flex items-center justify-between py-2 px-3 rounded-lg border-2 text-sm transition-all ${
-                      selectedMilk === milk.name
-                        ? 'border-brand-brown bg-brand-cream'
-                        : 'border-gray-200 hover:border-brand-brown/50'
-                    }`}
-                  >
-                    <span>{milk.name}</span>
-                    {milk.priceAdjustment !== 0 && (
-                      <span className="text-gray-500">
-                        {milk.priceAdjustment > 0 ? '+' : ''}{formatPrice(milk.priceAdjustment)}
-                      </span>
-                    )}
-                  </button>
-                ))}
+          {(() => {
+            const availableMilkOptions = getAvailableMilkOptions()
+            return availableMilkOptions.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-medium text-brand-brown mb-2">Milk</h3>
+                <div className="space-y-2">
+                  {availableMilkOptions.map((milk) => (
+                    <button
+                      key={milk.name}
+                      onClick={() => setSelectedMilk(milk.name)}
+                      className={`w-full flex items-center justify-between py-2 px-3 rounded-lg border-2 text-sm transition-all ${
+                        selectedMilk === milk.name
+                          ? 'border-brand-brown bg-brand-cream'
+                          : 'border-gray-200 hover:border-brand-brown/50'
+                      }`}
+                    >
+                      <span>{milk.name}</span>
+                      {milk.priceAdjustment !== 0 && (
+                        <span className="text-gray-500">
+                          {milk.priceAdjustment > 0 ? '+' : ''}{formatPrice(milk.priceAdjustment)}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )
+          })()}
 
           {/* Addons */}
           {product.addons && product.addons.length > 0 && (

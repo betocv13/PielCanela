@@ -82,7 +82,6 @@ export default function ProductModal({
 
   // Custom items
   const [customSizes, setCustomSizes] = useState<SizeOption[]>([])
-  const [customMilk, setCustomMilk] = useState<MilkOption[]>([])
   const [customAddons, setCustomAddons] = useState<AddonOption[]>([])
 
   // Category state
@@ -140,14 +139,10 @@ export default function ProductModal({
       const custom = product.sizes.filter(s => !defaultSizeNames.includes(s.name))
       setCustomSizes(custom)
 
-      // Set selected milk
-      const milkNames = new Set(product.milk_options.map(m => m.name))
-      setSelectedMilk(milkNames)
-
-      // Separate custom milk (anything not in global options)
+      // Set selected milk (only select milk options that exist in global settings)
       const globalMilkNames = globalMilkOptions.map(m => m.name)
-      const customM = product.milk_options.filter(m => !globalMilkNames.includes(m.name))
-      setCustomMilk(customM)
+      const milkNames = new Set(product.milk_options.map(m => m.name).filter(name => globalMilkNames.includes(name)))
+      setSelectedMilk(milkNames)
 
       // Set selected addons
       const addonNames = new Set(product.addons.map(a => a.name))
@@ -180,7 +175,6 @@ export default function ProductModal({
       setSelectedMilk(new Set())
       setSelectedAddons(new Set())
       setCustomSizes([])
-      setCustomMilk([])
       setCustomAddons([])
       setShowCustomCategory(false)
       setCustomCategory('')
@@ -235,13 +229,9 @@ export default function ProductModal({
     })
 
     // Build milk options array (using prices from global settings)
+    // Products only store which milk options are available - prices come from global settings
     const milk_options: MilkOption[] = []
     globalMilkOptions.forEach(milk => {
-      if (selectedMilk.has(milk.name)) {
-        milk_options.push(milk)
-      }
-    })
-    customMilk.forEach(milk => {
       if (selectedMilk.has(milk.name)) {
         milk_options.push(milk)
       }
@@ -306,14 +296,6 @@ export default function ProductModal({
     const newSize: SizeOption = { name, size: '', priceAdjustment: 0 }
     setCustomSizes([...customSizes, newSize])
     setSelectedSizes(new Set([...Array.from(selectedSizes), name]))
-  }
-
-  // Add custom milk
-  const addCustomMilk = () => {
-    const name = `Custom Milk ${customMilk.length + 1}`
-    const newMilk: MilkOption = { name, priceAdjustment: 0 }
-    setCustomMilk([...customMilk, newMilk])
-    setSelectedMilk(new Set([...Array.from(selectedMilk), name]))
   }
 
   // Add custom addon
@@ -608,83 +590,9 @@ export default function ProductModal({
                     </span>
                   </label>
                 ))}
-                {customMilk.map((milk, idx) => (
-                  <div key={idx} className="border border-gray-200 rounded-lg p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedMilk.has(milk.name)}
-                          onChange={(e) => {
-                            const newSet = new Set(selectedMilk)
-                            if (e.target.checked) {
-                              newSet.add(milk.name)
-                            } else {
-                              newSet.delete(milk.name)
-                            }
-                            setSelectedMilk(newSet)
-                          }}
-                          className="w-4 h-4 text-brand-brown border-gray-300 rounded focus:ring-brand-brown"
-                        />
-                        <span className="text-sm font-medium text-gray-700">Custom Milk</span>
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newSet = new Set(selectedMilk)
-                          newSet.delete(milk.name)
-                          setSelectedMilk(newSet)
-                          setCustomMilk(customMilk.filter((_, i) => i !== idx))
-                        }}
-                        className="p-1 text-red-500 hover:bg-red-50 rounded"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <input
-                        type="text"
-                        value={milk.name}
-                        onChange={(e) => {
-                          const oldName = milk.name
-                          const newMilk = [...customMilk]
-                          newMilk[idx] = { ...newMilk[idx], name: e.target.value }
-                          setCustomMilk(newMilk)
-                          const newSet = new Set(selectedMilk)
-                          newSet.delete(oldName)
-                          newSet.add(e.target.value)
-                          setSelectedMilk(newSet)
-                        }}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                        placeholder="Name"
-                      />
-                      <div className="flex items-center gap-1">
-                        <span className="text-sm text-gray-500">+$</span>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={milk.priceAdjustment}
-                          onChange={(e) => {
-                            const newMilk = [...customMilk]
-                            newMilk[idx] = { ...newMilk[idx], priceAdjustment: parseFloat(e.target.value) || 0 }
-                            setCustomMilk(newMilk)
-                          }}
-                          className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
-                          placeholder="0.00"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={addCustomMilk}
-                  className="flex items-center gap-1 text-sm text-brand-brown hover:text-brand-brown/80 mt-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add custom milk option
-                </button>
+                <p className="text-xs text-gray-500 mt-2">
+                  Milk options and prices are managed in Settings
+                </p>
               </div>
             </div>
 
