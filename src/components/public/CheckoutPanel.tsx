@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle } from 'lucide-react'
+import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle, ChevronLeft } from 'lucide-react'
 import { useCart } from '@/components/providers/CartProvider'
 import { formatPrice } from '@/lib/utils'
 import PaymentOptions from './PaymentOptions'
@@ -24,6 +24,9 @@ const formatTime12Hour = (time: string): string => {
 
 export default function CheckoutPanel() {
   const { items, removeItem, updateQuantity, isCartOpen, setIsCartOpen, subtotal, clearCart } = useCart()
+
+  // Step state (1: Order, 2: Details, 3: Payment)
+  const [step, setStep] = useState(1)
 
   // Order state
   const [loading, setLoading] = useState(false)
@@ -59,7 +62,6 @@ export default function CheckoutPanel() {
   // Update tax when subtotal changes
   useEffect(() => {
     if (tax > 0) {
-      // Recalculate based on stored tax rate
       fetchTaxRate()
     }
   }, [subtotal])
@@ -170,7 +172,7 @@ export default function CheckoutPanel() {
 
   const handleClose = () => {
     if (orderComplete) {
-      // Reset all state after order is complete
+      setStep(1)
       setOrderComplete(false)
       setOrderNumber('')
       setCustomerName('')
@@ -187,7 +189,13 @@ export default function CheckoutPanel() {
 
   const selectedDateSlots = availableSlots.find(s => s.date === pickupDate)?.slots || []
 
-  const canPlaceOrder = items.length > 0 && customerName && customerPhone && pickupDate && pickupTime && paymentMethod !== null
+  // Validation for each step
+  const canProceedStep1 = items.length > 0
+  const canProceedStep2 = customerName && customerPhone && pickupDate && pickupTime
+  const canPlaceOrder = canProceedStep2 && paymentMethod !== null
+
+  // Step titles
+  const stepTitles = ['Your Order', 'Pickup Details', 'Payment']
 
   if (!isCartOpen) return null
 
@@ -196,8 +204,6 @@ export default function CheckoutPanel() {
     return (
       <div className="fixed inset-0 z-50">
         <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
-
-        {/* Full screen on mobile, drawer on desktop */}
         <div className="absolute right-0 top-0 h-full w-full md:max-w-lg bg-white shadow-xl flex flex-col">
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
             <CheckCircle className="w-20 h-20 text-green-500 mb-6" />
@@ -227,24 +233,52 @@ export default function CheckoutPanel() {
   return (
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={handleClose}
-      />
+      <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
 
-      {/* Panel - Full screen on mobile, wider drawer on desktop */}
+      {/* Panel */}
       <div className="absolute right-0 top-0 h-full w-full md:max-w-lg bg-white shadow-xl flex flex-col">
         {/* Header */}
-        <div className="flex-shrink-0 flex items-center justify-between p-4 border-b bg-white">
-          <h2 className="text-xl font-heading text-brand-brown">
-            {items.length === 0 ? 'Your Cart' : 'Checkout'}
-          </h2>
-          <button
-            onClick={handleClose}
-            className="p-2 rounded-full hover:bg-gray-100"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
+        <div className="flex-shrink-0 border-b bg-white">
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-2">
+              {step > 1 && (
+                <button
+                  onClick={() => setStep(step - 1)}
+                  className="p-1 rounded-full hover:bg-gray-100"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-500" />
+                </button>
+              )}
+              <h2 className="text-xl font-heading text-brand-brown">
+                {items.length === 0 ? 'Your Cart' : stepTitles[step - 1]}
+              </h2>
+            </div>
+            <button onClick={handleClose} className="p-2 rounded-full hover:bg-gray-100">
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+
+          {/* Step indicator */}
+          {items.length > 0 && (
+            <div className="px-4 pb-3">
+              <div className="flex items-center gap-2">
+                {[1, 2, 3].map((s) => (
+                  <div key={s} className="flex-1 flex items-center">
+                    <div
+                      className={`h-1.5 w-full rounded-full transition-colors ${
+                        s <= step ? 'bg-brand-brown' : 'bg-gray-200'
+                      }`}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between mt-1">
+                <span className={`text-xs ${step >= 1 ? 'text-brand-brown' : 'text-gray-400'}`}>Order</span>
+                <span className={`text-xs ${step >= 2 ? 'text-brand-brown' : 'text-gray-400'}`}>Details</span>
+                <span className={`text-xs ${step >= 3 ? 'text-brand-brown' : 'text-gray-400'}`}>Payment</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Scrollable content */}
@@ -255,12 +289,9 @@ export default function CheckoutPanel() {
               <p className="text-lg">Your cart is empty</p>
             </div>
           ) : (
-            <div className="p-4 space-y-6">
-              {/* Cart Items Section */}
-              <div>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                  Your Order
-                </h3>
+            <div className="p-4">
+              {/* Step 1: Order Details */}
+              {step === 1 && (
                 <div className="space-y-3">
                   {items.map((item, index) => (
                     <div key={index} className="bg-gray-50 rounded-lg p-3">
@@ -288,7 +319,6 @@ export default function CheckoutPanel() {
                         </button>
                       </div>
 
-                      {/* Quantity and price */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <button
@@ -314,7 +344,6 @@ export default function CheckoutPanel() {
                     </div>
                   ))}
 
-                  {/* Clear cart button */}
                   <button
                     onClick={clearCart}
                     className="text-xs text-gray-500 hover:text-red-500 underline"
@@ -322,147 +351,148 @@ export default function CheckoutPanel() {
                     Clear cart
                   </button>
                 </div>
-              </div>
+              )}
 
-              {/* Pickup Time Section */}
-              <div>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                  Pickup Time
-                </h3>
+              {/* Step 2: Pickup Details & Contact Info */}
+              {step === 2 && (
+                <div className="space-y-6">
+                  {/* Pickup Time */}
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                      Pickup Time
+                    </h3>
 
-                {loadingSlots ? (
-                  <div className="p-3 text-center text-gray-500">Loading available times...</div>
-                ) : availableSlots.length === 0 ? (
-                  <div className="p-3 text-center text-red-500">No available pickup times</div>
-                ) : (
-                  <>
-                    {/* Date selection */}
-                    <div className="flex gap-2 overflow-x-auto pb-2 mb-3">
-                      {availableSlots.map((slot) => (
-                        <button
-                          key={slot.date}
-                          onClick={() => {
-                            setPickupDate(slot.date)
-                            setPickupTime(slot.slots[0] || '')
-                          }}
-                          className={`flex-shrink-0 px-3 py-2 rounded-lg border-2 text-sm ${
-                            pickupDate === slot.date
-                              ? 'border-brand-brown bg-brand-cream'
-                              : 'border-gray-200 hover:border-brand-brown/50'
-                          }`}
-                        >
-                          {slot.displayDate}
-                        </button>
-                      ))}
-                    </div>
+                    {loadingSlots ? (
+                      <div className="p-3 text-center text-gray-500">Loading available times...</div>
+                    ) : availableSlots.length === 0 ? (
+                      <div className="p-3 text-center text-red-500">No available pickup times</div>
+                    ) : (
+                      <>
+                        <div className="flex gap-2 overflow-x-auto pb-2 mb-3">
+                          {availableSlots.map((slot) => (
+                            <button
+                              key={slot.date}
+                              onClick={() => {
+                                setPickupDate(slot.date)
+                                setPickupTime(slot.slots[0] || '')
+                              }}
+                              className={`flex-shrink-0 px-3 py-2 rounded-lg border-2 text-sm ${
+                                pickupDate === slot.date
+                                  ? 'border-brand-brown bg-brand-cream'
+                                  : 'border-gray-200 hover:border-brand-brown/50'
+                              }`}
+                            >
+                              {slot.displayDate}
+                            </button>
+                          ))}
+                        </div>
 
-                    {/* Time selection */}
-                    {selectedDateSlots.length > 0 && (
-                      <div className="grid grid-cols-3 gap-2">
-                        {selectedDateSlots.map((time) => (
-                          <button
-                            key={time}
-                            onClick={() => setPickupTime(time)}
-                            className={`px-2 py-2 rounded-lg border-2 text-sm ${
-                              pickupTime === time
-                                ? 'border-brand-brown bg-brand-cream'
-                                : 'border-gray-200 hover:border-brand-brown/50'
-                            }`}
-                          >
-                            {formatTime12Hour(time)}
-                          </button>
-                        ))}
-                      </div>
+                        {selectedDateSlots.length > 0 && (
+                          <div className="grid grid-cols-3 gap-2">
+                            {selectedDateSlots.map((time) => (
+                              <button
+                                key={time}
+                                onClick={() => setPickupTime(time)}
+                                className={`px-2 py-2 rounded-lg border-2 text-sm ${
+                                  pickupTime === time
+                                    ? 'border-brand-brown bg-brand-cream'
+                                    : 'border-gray-200 hover:border-brand-brown/50'
+                                }`}
+                              >
+                                {formatTime12Hour(time)}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </>
                     )}
-                  </>
-                )}
-              </div>
-
-              {/* Contact Info Section */}
-              <div>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                  Contact Info
-                </h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-brand-brown mb-1">
-                      Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-brown"
-                      placeholder="Your name"
-                    />
                   </div>
 
+                  {/* Contact Info */}
                   <div>
-                    <label className="block text-sm font-medium text-brand-brown mb-1">
-                      Phone *
-                    </label>
-                    <input
-                      type="tel"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-brown"
-                      placeholder="(555) 123-4567"
-                    />
+                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                      Contact Info
+                    </h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-brand-brown mb-1">
+                          Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={customerName}
+                          onChange={(e) => setCustomerName(e.target.value)}
+                          className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-brown"
+                          placeholder="Your name"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-brand-brown mb-1">
+                          Phone *
+                        </label>
+                        <input
+                          type="tel"
+                          value={customerPhone}
+                          onChange={(e) => setCustomerPhone(e.target.value)}
+                          className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-brown"
+                          placeholder="(555) 123-4567"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-brand-brown mb-1">
+                          Email (optional)
+                        </label>
+                        <input
+                          type="email"
+                          value={customerEmail}
+                          onChange={(e) => setCustomerEmail(e.target.value)}
+                          className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-brown"
+                          placeholder="email@example.com"
+                        />
+                      </div>
+                    </div>
                   </div>
 
+                  {/* Special Notes */}
                   <div>
                     <label className="block text-sm font-medium text-brand-brown mb-1">
-                      Email (optional)
+                      Special Notes (optional)
                     </label>
-                    <input
-                      type="email"
-                      value={customerEmail}
-                      onChange={(e) => setCustomerEmail(e.target.value)}
-                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-brown"
-                      placeholder="email@example.com"
+                    <textarea
+                      value={specialNotes}
+                      onChange={(e) => setSpecialNotes(e.target.value)}
+                      className="w-full p-3 border border-gray-200 rounded-lg resize-none focus:outline-none focus:border-brand-brown"
+                      rows={2}
+                      placeholder="Any special requests for your order"
                     />
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* Payment Section */}
-              <div>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                  Payment Method
-                </h3>
-                <PaymentOptions
-                  selectedMethod={paymentMethod}
-                  onSelect={setPaymentMethod}
-                  orderNumber={orderNumber || 'pending'}
-                  total={total}
-                />
-              </div>
+              {/* Step 3: Payment */}
+              {step === 3 && (
+                <div className="space-y-4">
+                  <PaymentOptions
+                    selectedMethod={paymentMethod}
+                    onSelect={setPaymentMethod}
+                    orderNumber={orderNumber || 'pending'}
+                    total={total}
+                  />
 
-              {/* Special Notes */}
-              <div>
-                <label className="block text-sm font-medium text-brand-brown mb-1">
-                  Special Notes (optional)
-                </label>
-                <textarea
-                  value={specialNotes}
-                  onChange={(e) => setSpecialNotes(e.target.value)}
-                  className="w-full p-3 border border-gray-200 rounded-lg resize-none focus:outline-none focus:border-brand-brown"
-                  rows={2}
-                  placeholder="Any special requests for your order"
-                />
-              </div>
-
-              {/* Error message */}
-              {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-                  {error}
+                  {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                      {error}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* Sticky Footer with totals and Place Order */}
+        {/* Sticky Footer */}
         {items.length > 0 && (
           <div className="flex-shrink-0 border-t bg-white p-4 space-y-3">
             {/* Totals */}
@@ -481,23 +511,47 @@ export default function CheckoutPanel() {
               </div>
             </div>
 
-            {/* Place Order Button */}
-            <button
-              onClick={handleSubmit}
-              disabled={!canPlaceOrder || loading}
-              className="w-full bg-brand-brown text-white py-4 px-4 rounded-button font-semibold text-lg
-                         hover:bg-brand-brown/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed
-                         flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Placing Order...
-                </>
-              ) : (
-                `Place Order - ${formatPrice(total)}`
-              )}
-            </button>
+            {/* Action Button */}
+            {step === 1 && (
+              <button
+                onClick={() => setStep(2)}
+                disabled={!canProceedStep1}
+                className="w-full bg-brand-brown text-white py-4 px-4 rounded-button font-semibold text-lg
+                           hover:bg-brand-brown/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Continue
+              </button>
+            )}
+
+            {step === 2 && (
+              <button
+                onClick={() => setStep(3)}
+                disabled={!canProceedStep2}
+                className="w-full bg-brand-brown text-white py-4 px-4 rounded-button font-semibold text-lg
+                           hover:bg-brand-brown/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Continue to Payment
+              </button>
+            )}
+
+            {step === 3 && (
+              <button
+                onClick={handleSubmit}
+                disabled={!canPlaceOrder || loading}
+                className="w-full bg-brand-brown text-white py-4 px-4 rounded-button font-semibold text-lg
+                           hover:bg-brand-brown/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+                           flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Placing Order...
+                  </>
+                ) : (
+                  `Place Order - ${formatPrice(total)}`
+                )}
+              </button>
+            )}
           </div>
         )}
       </div>
