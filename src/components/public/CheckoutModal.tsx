@@ -62,7 +62,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         date.setDate(date.getDate() + i)
         const dateStr = date.toISOString().split('T')[0]
 
-        const res = await fetch(`/api/available-times?date=${dateStr}`)
+        const res = await fetch(`/api/orders/available-slots?date=${dateStr}`)
         if (res.ok) {
           const data = await res.json()
           if (data.slots && data.slots.length > 0) {
