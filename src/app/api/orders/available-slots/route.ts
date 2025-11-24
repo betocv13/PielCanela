@@ -98,8 +98,8 @@ export async function GET(request: Request) {
           const [h, m] = slot.split(':').map(Number)
           const slotTime = new Date(now)
           slotTime.setHours(h, m, 0, 0)
-          // Add 2 hour buffer for preparation
-          const bufferTime = new Date(now.getTime() + 2 * 60 * 60 * 1000)
+          // Add 1 hour buffer for preparation
+          const bufferTime = new Date(now.getTime() + 1 * 60 * 60 * 1000)
           return slotTime > bufferTime
         })
       : availableSlots
