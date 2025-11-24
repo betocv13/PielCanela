@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { getTodayInBusinessTZ, getNowInBusinessTZ } from '@/lib/utils'
-import { TIME_CONSTANTS, ORDER_STATUS } from '@/lib/constants'
+import { TIME_CONSTANTS } from '@/lib/constants'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -67,12 +67,11 @@ export async function GET(request: Request) {
       }
     }
 
-    // Get order counts for each slot (only count active orders)
+    // Get order counts for each slot (count all orders including completed)
     const { data: orders } = await supabase
       .from('orders')
       .select('pickup_time')
       .eq('pickup_date', date)
-      .in('status', [ORDER_STATUS.PENDING, ORDER_STATUS.READY])
 
     // Count orders per slot
     const slotCounts: Record<string, number> = {}

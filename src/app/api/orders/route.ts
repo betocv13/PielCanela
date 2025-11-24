@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import type { CreateOrderPayload } from '@/types'
-import { ORDER_STATUS } from '@/lib/constants'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -110,13 +109,12 @@ export async function POST(request: Request) {
       )
     }
 
-    // Check order limit for the time slot (only count active orders)
+    // Check order limit for the time slot (count all orders including completed)
     const { count: existingOrders, error: countError } = await supabase
       .from('orders')
       .select('*', { count: 'exact', head: true })
       .eq('pickup_date', body.pickup_date)
       .eq('pickup_time', body.pickup_time)
-      .in('status', [ORDER_STATUS.PENDING, ORDER_STATUS.READY])
 
     if (countError) {
       console.error('Error checking order count:', countError)
