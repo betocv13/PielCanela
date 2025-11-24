@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { getTodayInBusinessTZ, getNowInBusinessTZ } from '@/lib/utils'
+import { TIME_CONSTANTS, ORDER_STATUS } from '@/lib/constants'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -58,20 +59,20 @@ export async function GET(request: Request) {
       const timeStr = `${currentHour.toString().padStart(2, '0')}:${currentMin.toString().padStart(2, '0')}`
       slots.push(timeStr)
 
-      // Increment by 15 minutes
-      currentMin += 15
+      // Increment by configured slot interval
+      currentMin += TIME_CONSTANTS.SLOT_INTERVAL_MINUTES
       if (currentMin >= 60) {
         currentMin = 0
         currentHour += 1
       }
     }
 
-    // Get order counts for each slot
+    // Get order counts for each slot (only count active orders)
     const { data: orders } = await supabase
       .from('orders')
       .select('pickup_time')
       .eq('pickup_date', date)
-      .neq('status', 'completed')
+      .in('status', [ORDER_STATUS.PENDING, ORDER_STATUS.READY])
 
     // Count orders per slot
     const slotCounts: Record<string, number> = {}
@@ -96,8 +97,8 @@ export async function GET(request: Request) {
           const [h, m] = slot.split(':').map(Number)
           const slotTime = new Date(now)
           slotTime.setHours(h, m, 0, 0)
-          // Add 1 hour buffer for preparation
-          const bufferTime = new Date(now.getTime() + 1 * 60 * 60 * 1000)
+          // Add configured hour buffer for preparation
+          const bufferTime = new Date(now.getTime() + TIME_CONSTANTS.MIN_HOURS_BEFORE_PICKUP * 60 * 60 * 1000)
           return slotTime > bufferTime
         })
       : availableSlots
