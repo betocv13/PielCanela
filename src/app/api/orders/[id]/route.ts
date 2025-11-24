@@ -43,6 +43,17 @@ export async function PATCH(
     }
 
     // Use admin client to bypass RLS
+    const hasServiceKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY
+    console.log('Has service role key:', hasServiceKey)
+    console.log('Updating order:', id, 'with status:', status)
+
+    if (!hasServiceKey) {
+      return NextResponse.json(
+        { error: 'Service role key not configured' },
+        { status: 500 }
+      )
+    }
+
     const adminClient = createAdminClient()
     const { data: order, error: updateError } = await adminClient
       .from('orders')
@@ -53,8 +64,9 @@ export async function PATCH(
 
     if (updateError) {
       console.error('Error updating order:', updateError)
+      console.error('Update details:', { id, updates })
       return NextResponse.json(
-        { error: 'Failed to update order' },
+        { error: 'Failed to update order', details: updateError.message },
         { status: 500 }
       )
     }
