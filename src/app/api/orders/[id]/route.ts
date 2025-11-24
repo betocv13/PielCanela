@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { ORDER_STATUS } from '@/lib/constants'
 
@@ -11,9 +11,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // First check authentication with regular client
     const supabase = await createClient()
-
-    // Check if user is authenticated (admin only)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json(
@@ -43,8 +42,9 @@ export async function PATCH(
       updates.completed_at = null
     }
 
-    // Update the order
-    const { data: order, error: updateError } = await supabase
+    // Use admin client to bypass RLS
+    const adminClient = createAdminClient()
+    const { data: order, error: updateError } = await adminClient
       .from('orders')
       .update(updates)
       .eq('id', id)
