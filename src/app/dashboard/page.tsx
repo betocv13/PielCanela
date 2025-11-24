@@ -110,26 +110,25 @@ export default function OrdersPage() {
   })
 
   const updateOrderStatus = async (orderId: string, status: Order['status']) => {
-    const supabase = createClient()
+    try {
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      })
 
-    const updates: { status: Order['status']; completed_at?: string | null } = { status }
-    if (status === 'completed') {
-      updates.completed_at = new Date().toISOString()
-    } else {
-      updates.completed_at = null
-    }
+      if (!response.ok) {
+        const error = await response.json()
+        console.error('Error updating order status:', error)
+        return
+      }
 
-    const { error } = await supabase
-      .from('orders')
-      .update(updates)
-      .eq('id', orderId)
-
-    if (error) {
+      fetchOrders()
+    } catch (error) {
       console.error('Error updating order status:', error)
-      return
     }
-
-    fetchOrders()
   }
 
   const updatePaymentStatus = async (orderId: string, confirmed: boolean) => {

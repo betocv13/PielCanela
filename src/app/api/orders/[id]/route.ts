@@ -35,10 +35,18 @@ export async function PATCH(
       )
     }
 
+    // Prepare update object
+    const updates: { status: string; completed_at?: string | null } = { status }
+    if (status === 'completed') {
+      updates.completed_at = new Date().toISOString()
+    } else {
+      updates.completed_at = null
+    }
+
     // Update the order
     const { data: order, error: updateError } = await supabase
       .from('orders')
-      .update({ status })
+      .update(updates)
       .eq('id', id)
       .select()
       .single()
