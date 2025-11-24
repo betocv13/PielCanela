@@ -67,7 +67,7 @@ export interface Order {
   total: number
   payment_method: 'cash' | 'venmo' | 'cashapp'
   payment_confirmed: boolean
-  status: 'pending' | 'ready' | 'completed'
+  status: 'pending' | 'ready' | 'completed' | 'cancelled'
   pickup_date: string
   pickup_time: string
   special_notes: string | null

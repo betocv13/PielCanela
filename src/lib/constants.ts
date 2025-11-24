@@ -16,6 +16,7 @@ export const ORDER_STATUS = {
   PENDING: 'pending',
   READY: 'ready',
   COMPLETED: 'completed',
+  CANCELLED: 'cancelled',
 } as const
 
 // Payment Methods

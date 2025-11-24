@@ -67,11 +67,12 @@ export async function GET(request: Request) {
       }
     }
 
-    // Get order counts for each slot (count all orders including completed)
+    // Get order counts for each slot (count all orders except cancelled)
     const { data: orders } = await supabase
       .from('orders')
       .select('pickup_time')
       .eq('pickup_date', date)
+      .neq('status', 'cancelled')
 
     // Count orders per slot
     const slotCounts: Record<string, number> = {}

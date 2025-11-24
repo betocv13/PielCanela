@@ -109,12 +109,13 @@ export async function POST(request: Request) {
       )
     }
 
-    // Check order limit for the time slot (count all orders including completed)
+    // Check order limit for the time slot (count all orders except cancelled)
     const { count: existingOrders, error: countError } = await supabase
       .from('orders')
       .select('*', { count: 'exact', head: true })
       .eq('pickup_date', body.pickup_date)
       .eq('pickup_time', body.pickup_time)
+      .neq('status', 'cancelled')
 
     if (countError) {
       console.error('Error checking order count:', countError)

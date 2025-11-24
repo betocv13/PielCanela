@@ -6,7 +6,7 @@ import { Clock, User, Phone, ChevronDown } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Order } from '@/types'
 
-type FilterTab = 'all' | 'pending_payment' | 'completed'
+type FilterTab = 'all' | 'pending_payment' | 'completed' | 'cancelled'
 type SortOption = 'pickup_time' | 'created_at' | 'order_number'
 
 export default function OrdersPage() {
@@ -16,10 +16,11 @@ export default function OrdersPage() {
   const [sortBy, setSortBy] = useState<SortOption>('pickup_time')
   const [showSortDropdown, setShowSortDropdown] = useState(false)
 
-  // Calculate stats
-  const todaysOrders = orders.filter(order => isToday(parseISO(order.pickup_date))).length
-  const pendingPayment = orders.filter(order => !order.payment_confirmed && order.status !== 'completed').length
-  const readyOrders = orders.filter(order => order.status === 'ready').length
+  // Calculate stats (exclude cancelled orders)
+  const activeOrders = orders.filter(order => order.status !== 'cancelled')
+  const todaysOrders = activeOrders.filter(order => isToday(parseISO(order.pickup_date))).length
+  const pendingPayment = activeOrders.filter(order => !order.payment_confirmed && order.status !== 'completed').length
+  const readyOrders = activeOrders.filter(order => order.status === 'ready').length
 
   const fetchOrders = useCallback(async () => {
     const supabase = createClient()
@@ -82,11 +83,13 @@ export default function OrdersPage() {
   const filteredOrders = orders.filter(order => {
     switch (activeTab) {
       case 'pending_payment':
-        return !order.payment_confirmed && order.status !== 'completed'
+        return !order.payment_confirmed && order.status !== 'completed' && order.status !== 'cancelled'
       case 'completed':
         return order.status === 'completed'
+      case 'cancelled':
+        return order.status === 'cancelled'
       default:
-        return order.status !== 'completed' // All Orders shows only active orders
+        return order.status !== 'completed' && order.status !== 'cancelled' // All Orders shows only active orders
     }
   })
 
@@ -245,6 +248,16 @@ export default function OrdersPage() {
           >
             Completed
           </button>
+          <button
+            onClick={() => setActiveTab('cancelled')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'cancelled'
+                ? 'border-brand-brown text-brand-brown'
+                : 'border-transparent text-gray-500 hover:text-brand-brown'
+            }`}
+          >
+            Cancelled
+          </button>
         </div>
 
         <div className="relative">
@@ -291,6 +304,7 @@ export default function OrdersPage() {
             <option value="all">All Orders</option>
             <option value="pending_payment">Pending Payment</option>
             <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-brown pointer-events-none" />
         </div>
@@ -323,6 +337,8 @@ export default function OrdersPage() {
                   ? 'border-t-green-500'
                   : order.status === 'completed'
                   ? 'border-t-gray-400'
+                  : order.status === 'cancelled'
+                  ? 'border-t-gray-300'
                   : 'border-t-red-500'
               }`}
             >
@@ -405,10 +421,10 @@ export default function OrdersPage() {
               {/* Order Status */}
               <div className="px-4 py-3 border-b border-gray-100">
                 <p className="text-sm font-medium text-brand-brown mb-2">STATUS:</p>
-                <div className="flex gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => updateOrderStatus(order.id, 'pending')}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                       order.status === 'pending'
                         ? 'bg-brand-brown text-white'
                         : 'bg-gray-100 text-brand-brown hover:bg-gray-200'
@@ -418,7 +434,7 @@ export default function OrdersPage() {
                   </button>
                   <button
                     onClick={() => updateOrderStatus(order.id, 'ready')}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                       order.status === 'ready'
                         ? 'bg-brand-brown text-white'
                         : 'bg-gray-100 text-brand-brown hover:bg-gray-200'
@@ -428,13 +444,23 @@ export default function OrdersPage() {
                   </button>
                   <button
                     onClick={() => updateOrderStatus(order.id, 'completed')}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                       order.status === 'completed'
                         ? 'bg-brand-brown text-white'
                         : 'bg-gray-100 text-brand-brown hover:bg-gray-200'
                     }`}
                   >
                     Done
+                  </button>
+                  <button
+                    onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                    className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                      order.status === 'cancelled'
+                        ? 'bg-red-600 text-white'
+                        : 'bg-gray-100 text-red-600 hover:bg-red-50'
+                    }`}
+                  >
+                    Cancel
                   </button>
                 </div>
               </div>
