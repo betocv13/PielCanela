@@ -25,9 +25,9 @@ export async function GET(request: Request) {
     const { data: dates, error } = await query
 
     if (error) {
-      console.error('Error fetching pickup dates:', error)
+      console.error('Error fetching pickup dates:', error.message, error.code, error.details)
       return NextResponse.json(
-        { error: 'Failed to fetch pickup dates' },
+        { error: 'Failed to fetch pickup dates', details: error.message },
         { status: 500 }
       )
     }
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error in pickup dates API:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }
@@ -112,9 +112,9 @@ export async function POST(request: Request) {
           { status: 409 }
         )
       }
-      console.error('Error inserting pickup date:', insertError)
+      console.error('Error inserting pickup date:', insertError.message, insertError.code, insertError.details)
       return NextResponse.json(
-        { error: 'Failed to add pickup date' },
+        { error: 'Failed to add pickup date', details: insertError.message },
         { status: 500 }
       )
     }
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error in add pickup date API:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }
