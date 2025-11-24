@@ -100,22 +100,31 @@ export default function CheckoutPanel() {
   const fetchAvailableSlots = async () => {
     setLoadingSlots(true)
     try {
+      // First fetch available pickup dates
+      const pickupDatesRes = await fetch('/api/pickup-dates')
+      if (!pickupDatesRes.ok) {
+        setAvailableSlots([])
+        return
+      }
+
+      const pickupDatesData = await pickupDatesRes.json()
+      const pickupDates = pickupDatesData.dates || []
+
+      if (pickupDates.length === 0) {
+        setAvailableSlots([])
+        return
+      }
+
+      // Fetch available time slots for each pickup date
       const slots: AvailableSlot[] = []
-      const today = new Date()
 
-      for (let i = 0; i < 7; i++) {
-        const date = new Date(today)
-        date.setDate(date.getDate() + i)
-        // Use local timezone for date string (not UTC)
-        const year = date.getFullYear()
-        const month = String(date.getMonth() + 1).padStart(2, '0')
-        const day = String(date.getDate()).padStart(2, '0')
-        const dateStr = `${year}-${month}-${day}`
-
+      for (const pickupDate of pickupDates) {
+        const dateStr = pickupDate.date
         const res = await fetch(`/api/orders/available-slots?date=${dateStr}`)
         if (res.ok) {
           const data = await res.json()
           if (data.slots && data.slots.length > 0) {
+            const date = new Date(dateStr + 'T00:00:00')
             slots.push({
               date: dateStr,
               displayDate: date.toLocaleDateString('en-US', {

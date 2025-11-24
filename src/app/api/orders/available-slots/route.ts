@@ -27,26 +27,25 @@ export async function GET(request: Request) {
 
     const maxOrdersPerSlot = settingsData ? Number(settingsData.value) : 2
 
-    // Get business hours for the day
-    const dayOfWeek = new Date(date).getDay()
-    const { data: hoursData } = await supabase
-      .from('business_hours')
+    // Get pickup date for this specific date
+    const { data: pickupDateData } = await supabase
+      .from('pickup_dates')
       .select('*')
-      .eq('day_of_week', dayOfWeek)
+      .eq('date', date)
       .single()
 
-    if (!hoursData || !hoursData.is_open) {
+    if (!pickupDateData) {
       return NextResponse.json({
         date,
         slots: [],
-        message: 'Closed on this day'
+        message: 'No pickup available on this date'
       })
     }
 
     // Generate all possible time slots
     const slots: string[] = []
-    const [openHour, openMin] = hoursData.open_time.split(':').map(Number)
-    const [closeHour, closeMin] = hoursData.close_time.split(':').map(Number)
+    const [openHour, openMin] = pickupDateData.open_time.split(':').map(Number)
+    const [closeHour, closeMin] = pickupDateData.close_time.split(':').map(Number)
 
     let currentHour = openHour
     let currentMin = openMin
