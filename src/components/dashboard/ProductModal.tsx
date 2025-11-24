@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { X, Upload, Plus, Trash2 } from 'lucide-react'
 import { Product, SizeOption, MilkOption, AddonOption } from '@/types'
 
@@ -189,7 +190,7 @@ export default function ProductModal({
       setCustomCategory('')
     }
     setError(null)
-  }, [product, isOpen, globalMilkOptions, globalAddonOptions])
+  }, [product, isOpen, globalMilkOptions, globalAddonOptions, allCategories])
 
   // Handle image upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -589,11 +590,14 @@ export default function ProductModal({
               >
                 {formData.image_url ? (
                   <div className="space-y-2">
-                    <img
-                      src={formData.image_url}
-                      alt="Product preview"
-                      className="w-32 h-32 object-cover rounded-lg mx-auto"
-                    />
+                    <div className="w-32 h-32 relative mx-auto">
+                      <Image
+                        src={formData.image_url}
+                        alt="Product preview"
+                        fill
+                        className="object-cover rounded-lg"
+                      />
+                    </div>
                     <p className="text-sm text-brand-brown">Click to change image</p>
                   </div>
                 ) : (
