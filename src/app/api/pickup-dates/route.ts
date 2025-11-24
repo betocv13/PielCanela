@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getTodayInBusinessTZ } from '@/lib/utils'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -18,12 +19,8 @@ export async function GET(request: Request) {
 
     // By default, only return today and future dates
     if (!includeAll) {
-      // Use local timezone for date comparison (consistent with available-slots API)
-      const now = new Date()
-      const todayYear = now.getFullYear()
-      const todayMonth = String(now.getMonth() + 1).padStart(2, '0')
-      const todayDay = String(now.getDate()).padStart(2, '0')
-      const today = `${todayYear}-${todayMonth}-${todayDay}`
+      // Use business timezone for date comparison
+      const today = getTodayInBusinessTZ()
       query = query.gte('date', today)
     }
 

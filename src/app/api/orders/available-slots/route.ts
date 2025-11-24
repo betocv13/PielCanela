@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getTodayInBusinessTZ, getNowInBusinessTZ } from '@/lib/utils'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -86,12 +87,9 @@ export async function GET(request: Request) {
     })
 
     // Also filter out slots that are in the past (for today)
-    const now = new Date()
-    // Use local timezone for date comparison (not UTC)
-    const todayYear = now.getFullYear()
-    const todayMonth = String(now.getMonth() + 1).padStart(2, '0')
-    const todayDay = String(now.getDate()).padStart(2, '0')
-    const today = `${todayYear}-${todayMonth}-${todayDay}`
+    // Use business timezone for date and time comparison
+    const now = getNowInBusinessTZ()
+    const today = getTodayInBusinessTZ()
 
     const filteredSlots = date === today
       ? availableSlots.filter(slot => {

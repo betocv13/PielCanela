@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle, ChevronLeft } from 'lucide-react'
 import { useCart } from '@/components/providers/CartProvider'
 import { formatPrice } from '@/lib/utils'
@@ -82,22 +82,7 @@ export default function CheckoutPanel() {
     }
   }, [isCartOpen])
 
-  // Fetch available time slots when panel opens
-  useEffect(() => {
-    if (isCartOpen && items.length > 0) {
-      fetchAvailableSlots()
-      fetchTaxRate()
-    }
-  }, [isCartOpen, items.length])
-
-  // Update tax when subtotal changes
-  useEffect(() => {
-    if (tax > 0) {
-      fetchTaxRate()
-    }
-  }, [subtotal])
-
-  const fetchAvailableSlots = async () => {
+  const fetchAvailableSlots = useCallback(async () => {
     setLoadingSlots(true)
     try {
       // First fetch available pickup dates
@@ -150,9 +135,9 @@ export default function CheckoutPanel() {
     } finally {
       setLoadingSlots(false)
     }
-  }
+  }, [pickupDate])
 
-  const fetchTaxRate = async () => {
+  const fetchTaxRate = useCallback(async () => {
     try {
       const res = await fetch('/api/settings')
       if (res.ok) {
@@ -163,7 +148,22 @@ export default function CheckoutPanel() {
     } catch (err) {
       console.error('Error fetching tax rate:', err)
     }
-  }
+  }, [subtotal])
+
+  // Fetch available time slots when panel opens
+  useEffect(() => {
+    if (isCartOpen && items.length > 0) {
+      fetchAvailableSlots()
+      fetchTaxRate()
+    }
+  }, [isCartOpen, items.length, fetchAvailableSlots, fetchTaxRate])
+
+  // Update tax when subtotal changes
+  useEffect(() => {
+    if (tax > 0) {
+      fetchTaxRate()
+    }
+  }, [subtotal, fetchTaxRate, tax])
 
   const handleSubmit = async () => {
     setError('')

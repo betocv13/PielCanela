@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { toZonedTime, format } from 'date-fns-tz'
 
 // Utility for merging Tailwind classes
 export function cn(...inputs: ClassValue[]) {
@@ -100,4 +101,23 @@ export function formatPhoneNumber(phone: string): string {
 export function isValidPhoneNumber(phone: string): boolean {
   const cleaned = phone.replace(/\D/g, '')
   return cleaned.length === 10
+}
+
+// Get business timezone from environment variable (defaults to America/Phoenix)
+export function getBusinessTimezone(): string {
+  return process.env.BUSINESS_TIMEZONE || 'America/Phoenix'
+}
+
+// Get current date in business timezone as YYYY-MM-DD string
+export function getTodayInBusinessTZ(): string {
+  const timezone = getBusinessTimezone()
+  const now = new Date()
+  const zonedDate = toZonedTime(now, timezone)
+  return format(zonedDate, 'yyyy-MM-dd', { timeZone: timezone })
+}
+
+// Get current Date object in business timezone
+export function getNowInBusinessTZ(): Date {
+  const timezone = getBusinessTimezone()
+  return toZonedTime(new Date(), timezone)
 }
