@@ -338,17 +338,10 @@ export default function CheckoutPanel() {
                       <p className="text-sm text-blue-700 mb-2">
                         Send <strong className="text-lg">{formatPrice(orderTotal)}</strong> to
                       </p>
-                      {venmoLinks && (
-                        <a
-                          href={venmoLinks.webLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block text-blue-600 font-bold text-xl hover:text-blue-700 underline"
-                        >
-                          {paymentSettings.venmo_username}
-                        </a>
-                      )}
-                      <p className="text-xs text-blue-600 mt-2">
+                      <p className="text-blue-600 font-bold text-2xl mb-1">
+                        {paymentSettings.venmo_username}
+                      </p>
+                      <p className="text-xs text-blue-600">
                         Include &quot;Order-{orderNumber}&quot; in the note
                       </p>
                     </div>
@@ -397,16 +390,9 @@ export default function CheckoutPanel() {
                       <p className="text-sm text-green-700 mb-2">
                         Send <strong className="text-lg">{formatPrice(orderTotal)}</strong> to
                       </p>
-                      {cashappLink && (
-                        <a
-                          href={cashappLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block text-green-600 font-bold text-xl hover:text-green-700 underline"
-                        >
-                          {paymentSettings.cashapp_username}
-                        </a>
-                      )}
+                      <p className="text-green-600 font-bold text-2xl">
+                        {paymentSettings.cashapp_username}
+                      </p>
                     </div>
 
                     {cashappLink && (
