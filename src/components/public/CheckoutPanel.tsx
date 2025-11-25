@@ -251,7 +251,7 @@ export default function CheckoutPanel() {
         <div className="absolute right-0 top-0 h-full w-full md:max-w-lg bg-white shadow-xl flex flex-col">
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
             <CheckCircle className="w-20 h-20 text-green-500 mb-6" />
-            <h2 className="text-3xl font-heading text-brand-brown mb-3">Order Placed!</h2>
+            <h2 className="text-3xl font-body font-bold text-brand-brown mb-3">Order Placed!</h2>
             <p className="text-lg text-gray-600 mb-2">
               Your order number is
             </p>
@@ -293,7 +293,7 @@ export default function CheckoutPanel() {
                   <ChevronLeft className="w-5 h-5 text-gray-500" />
                 </button>
               )}
-              <h2 className="text-xl font-heading text-brand-brown">
+              <h2 className="text-xl font-body font-bold text-brand-brown">
                 {items.length === 0 ? 'Your Cart' : stepTitles[step - 1]}
               </h2>
             </div>
