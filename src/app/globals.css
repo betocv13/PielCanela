@@ -8,9 +8,8 @@
 @font-face {
   font-family: 'TAN Songbird';
   src: local('TAN Songbird'),
-       url('/fonts/TAN-Songbird.woff2') format('woff2'),
-       url('/fonts/TAN-Songbird.ttf') format('truetype'),
-       url('/fonts/TAN-Songbird.otf') format('opentype');
+       url('/fonts/TANSONGBIRD.ttf') format('truetype'),
+       url('/fonts/TANSONGBIRD.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
