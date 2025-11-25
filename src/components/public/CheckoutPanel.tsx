@@ -224,7 +224,7 @@ export default function CheckoutPanel() {
         body: JSON.stringify({
           customer_name: customerName,
           customer_phone: customerPhone,
-          customer_email: customerEmail || undefined,
+          customer_email: customerEmail,
           items: orderItems,
           subtotal,
           total,
@@ -275,7 +275,7 @@ export default function CheckoutPanel() {
 
   // Validation for each step
   const canProceedStep1 = items.length > 0
-  const canProceedStep2 = customerName && customerPhone && pickupDate && pickupTime
+  const canProceedStep2 = customerName && customerPhone && customerEmail && pickupDate && pickupTime
   const canPlaceOrder = canProceedStep2 && paymentMethod !== null
 
   // Step titles
@@ -652,7 +652,7 @@ export default function CheckoutPanel() {
 
                       <div>
                         <label className="block text-sm font-medium text-brand-brown mb-1">
-                          Email (optional)
+                          Email
                         </label>
                         <input
                           type="email"
@@ -660,6 +660,7 @@ export default function CheckoutPanel() {
                           onChange={(e) => setCustomerEmail(e.target.value)}
                           className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-brown"
                           placeholder="email@example.com"
+                          required
                         />
                       </div>
                     </div>

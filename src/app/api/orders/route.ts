@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import type { CreateOrderPayload } from '@/types'
+import { generateCustomerOrderEmail, generateAdminOrderEmail } from '@/lib/emailTemplates'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -212,6 +213,56 @@ export async function POST(request: Request) {
         { error: 'Failed to create order' },
         { status: 500 }
       )
+    }
+
+    // Send email notifications (don't block order creation if emails fail)
+    try {
+      const emailData = {
+        orderNumber: order.order_number,
+        customerName: order.customer_name,
+        customerEmail: order.customer_email || '',
+        customerPhone: order.customer_phone,
+        items: order.items,
+        subtotal: order.subtotal,
+        tax: order.tax,
+        total: order.total,
+        paymentMethod: order.payment_method,
+        pickupDate: order.pickup_date,
+        pickupTime: order.pickup_time,
+        specialNotes: order.special_notes || undefined,
+      }
+
+      // Send customer confirmation email
+      if (order.customer_email) {
+        const customerEmailHtml = generateCustomerOrderEmail(emailData)
+        await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: order.customer_email,
+            subject: `Order Confirmation - Piel Canela #${order.order_number}`,
+            html: customerEmailHtml,
+          }),
+        })
+      }
+
+      // Send admin notification email
+      const adminEmail = settings.admin_email as string
+      if (adminEmail) {
+        const adminEmailHtml = generateAdminOrderEmail(emailData)
+        await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: adminEmail,
+            subject: `New Order #${order.order_number} - Piel Canela`,
+            html: adminEmailHtml,
+          }),
+        })
+      }
+    } catch (emailError) {
+      // Log error but don't fail the order creation
+      console.error('Error sending email notifications:', emailError)
     }
 
     return NextResponse.json({ order }, { status: 201 })
