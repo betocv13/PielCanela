@@ -2,7 +2,7 @@ import Image from 'next/image'
 
 export default function Hero() {
   return (
-    <section className="relative h-[70vh] md:h-[80vh] w-full">
+    <section className="relative h-[100vh] md:h-[100vh] w-full">
       {/* Mobile image */}
       <Image
         src="/images/Mobile.png"
