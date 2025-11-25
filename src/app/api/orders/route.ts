@@ -218,6 +218,8 @@ export async function POST(request: Request) {
     // Send admin notification email (don't block order creation if email fails)
     try {
       const adminEmail = settings.admin_email as string
+      console.log('Admin email from settings:', adminEmail)
+
       if (adminEmail) {
         const emailData = {
           orderNumber: order.order_number,
@@ -235,7 +237,10 @@ export async function POST(request: Request) {
         }
 
         const adminEmailHtml = generateAdminOrderEmail(emailData)
-        await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/send-email`, {
+        const emailApiUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/send-email`
+        console.log('Sending email to:', emailApiUrl)
+
+        const emailResponse = await fetch(emailApiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -244,6 +249,15 @@ export async function POST(request: Request) {
             html: adminEmailHtml,
           }),
         })
+
+        const emailResult = await emailResponse.json()
+        console.log('Email send result:', emailResult)
+
+        if (!emailResponse.ok) {
+          console.error('Email send failed:', emailResult)
+        }
+      } else {
+        console.log('No admin email configured in settings')
       }
     } catch (emailError) {
       // Log error but don't fail the order creation
