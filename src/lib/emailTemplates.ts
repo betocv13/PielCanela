@@ -89,6 +89,7 @@ export const generateCustomerOrderEmail = (data: OrderEmailData): string => {
       <td style="padding: 8px 0; border-bottom: 1px solid ${BRAND_CREAM};">
         <strong>${item.quantity}x ${item.productName}</strong>
         ${item.size ? `<br><span style="color: #666; font-size: 14px;">${item.size}</span>` : ''}
+        ${item.temperature ? `<br><span style="color: #666; font-size: 14px;">${item.temperature.charAt(0).toUpperCase() + item.temperature.slice(1)}</span>` : ''}
         ${item.milk ? `<br><span style="color: #666; font-size: 14px;">${item.milk}</span>` : ''}
         ${item.addons.length > 0 ? `<br><span style="color: #666; font-size: 14px;">${item.addons.join(', ')}</span>` : ''}
         ${item.specialInstructions ? `<br><span style="color: #999; font-size: 13px; font-style: italic;">${item.specialInstructions}</span>` : ''}
@@ -169,6 +170,7 @@ export const generateAdminOrderEmail = (data: OrderEmailData): string => {
       <td style="padding: 8px 0; border-bottom: 1px solid ${BRAND_CREAM};">
         <strong>${item.quantity}x ${item.productName}</strong>
         ${item.size ? `<br><span style="color: #666; font-size: 14px;">${item.size}</span>` : ''}
+        ${item.temperature ? `<br><span style="color: #666; font-size: 14px;">${item.temperature.charAt(0).toUpperCase() + item.temperature.slice(1)}</span>` : ''}
         ${item.milk ? `<br><span style="color: #666; font-size: 14px;">${item.milk}</span>` : ''}
         ${item.addons.length > 0 ? `<br><span style="color: #666; font-size: 14px;">${item.addons.join(', ')}</span>` : ''}
         ${item.specialInstructions ? `<br><span style="color: #999; font-size: 13px; font-style: italic;">${item.specialInstructions}</span>` : ''}
