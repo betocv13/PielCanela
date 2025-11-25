@@ -61,6 +61,9 @@ export default function CheckoutPanel() {
   // Payment settings for success screen
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings | null>(null)
 
+  // Store order total for confirmation screen (since cart gets cleared)
+  const [orderTotal, setOrderTotal] = useState(0)
+
   // Lock body scroll when panel is open (works on iOS too)
   useEffect(() => {
     if (isCartOpen) {
@@ -238,6 +241,8 @@ export default function CheckoutPanel() {
         throw new Error(data.error || 'Failed to place order')
       }
 
+      // Save order total before clearing cart (to display on success screen)
+      setOrderTotal(total)
       setOrderNumber(data.order.order_number)
       setOrderComplete(true)
       clearCart()
@@ -253,6 +258,7 @@ export default function CheckoutPanel() {
       setStep(1)
       setOrderComplete(false)
       setOrderNumber('')
+      setOrderTotal(0)
       setCustomerName('')
       setCustomerPhone('')
       setCustomerEmail('')
@@ -280,12 +286,12 @@ export default function CheckoutPanel() {
   // Order complete screen
   if (orderComplete) {
     // Generate payment links
-    const venmoLinks = paymentSettings && orderNumber && total
-      ? generateVenmoLink(paymentSettings.venmo_username, total, orderNumber)
+    const venmoLinks = paymentSettings && orderNumber && orderTotal
+      ? generateVenmoLink(paymentSettings.venmo_username, orderTotal, orderNumber)
       : null
 
-    const cashappLink = paymentSettings && total
-      ? generateCashAppLink(paymentSettings.cashapp_username, total)
+    const cashappLink = paymentSettings && orderTotal
+      ? generateCashAppLink(paymentSettings.cashapp_username, orderTotal)
       : null
 
     return (
@@ -328,14 +334,24 @@ export default function CheckoutPanel() {
                       </div>
                     )}
 
-                    <p className="text-sm text-blue-700 mb-2 text-center">
-                      Send <strong className="text-lg">{formatPrice(total)}</strong> to{' '}
-                      <strong>{paymentSettings.venmo_username}</strong>
-                    </p>
-
-                    <p className="text-xs text-blue-600 mb-4 text-center">
-                      Include &quot;Order-{orderNumber}&quot; in the note
-                    </p>
+                    <div className="text-center mb-4">
+                      <p className="text-sm text-blue-700 mb-2">
+                        Send <strong className="text-lg">{formatPrice(orderTotal)}</strong> to
+                      </p>
+                      {venmoLinks && (
+                        <a
+                          href={venmoLinks.webLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block text-blue-600 font-bold text-xl hover:text-blue-700 underline"
+                        >
+                          {paymentSettings.venmo_username}
+                        </a>
+                      )}
+                      <p className="text-xs text-blue-600 mt-2">
+                        Include &quot;Order-{orderNumber}&quot; in the note
+                      </p>
+                    </div>
 
                     {venmoLinks && (
                       <div className="space-y-2">
@@ -377,10 +393,21 @@ export default function CheckoutPanel() {
                       </div>
                     )}
 
-                    <p className="text-sm text-green-700 mb-4 text-center">
-                      Send <strong className="text-lg">{formatPrice(total)}</strong> to{' '}
-                      <strong>{paymentSettings.cashapp_username}</strong>
-                    </p>
+                    <div className="text-center mb-4">
+                      <p className="text-sm text-green-700 mb-2">
+                        Send <strong className="text-lg">{formatPrice(orderTotal)}</strong> to
+                      </p>
+                      {cashappLink && (
+                        <a
+                          href={cashappLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block text-green-600 font-bold text-xl hover:text-green-700 underline"
+                        >
+                          {paymentSettings.cashapp_username}
+                        </a>
+                      )}
+                    </div>
 
                     {cashappLink && (
                       <a
@@ -404,7 +431,7 @@ export default function CheckoutPanel() {
                       Please bring exact change if possible. Payment is due at pickup.
                     </p>
                     <p className="text-2xl font-bold text-brand-brown text-center">
-                      Total due: {formatPrice(total)}
+                      Total due: {formatPrice(orderTotal)}
                     </p>
                   </div>
                 )}
