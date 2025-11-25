@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Zap, Calendar, Loader2, Plus, Trash2, Edit2, X, Check } from 'lucide-react'
+import { Calendar, Loader2, Plus, Trash2, Edit2, X, Check } from 'lucide-react'
 import { formatTime } from '@/lib/utils'
 import type { PickupDate } from '@/types'
 
@@ -43,9 +43,7 @@ function formatDateForInput(date: Date): string {
 
 export default function PickupDatesPage() {
   const [dates, setDates] = useState<PickupDate[]>([])
-  const [orderingEnabled, setOrderingEnabled] = useState(true)
   const [loading, setLoading] = useState(true)
-  const [togglingOrdering, setTogglingOrdering] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   // New date form state
@@ -68,11 +66,7 @@ export default function PickupDatesPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch pickup dates and settings in parallel
-        const [datesRes, settingsRes] = await Promise.all([
-          fetch('/api/pickup-dates'),
-          fetch('/api/settings'),
-        ])
+        const datesRes = await fetch('/api/pickup-dates')
 
         if (datesRes.ok) {
           const datesData = await datesRes.json()
@@ -84,12 +78,6 @@ export default function PickupDatesPage() {
           }))
           setDates(normalizedDates)
         }
-
-        if (settingsRes.ok) {
-          const settingsData = await settingsRes.json()
-          const enabled = settingsData.settings.ordering_enabled
-          setOrderingEnabled(enabled === true || enabled === 'true')
-        }
       } catch (error) {
         console.error('Error fetching data:', error)
         setMessage({ type: 'error', text: 'Failed to load pickup dates' })
@@ -100,38 +88,6 @@ export default function PickupDatesPage() {
 
     fetchData()
   }, [])
-
-  // Toggle ordering enabled/disabled
-  async function handleToggleOrdering() {
-    setTogglingOrdering(true)
-    setMessage(null)
-
-    try {
-      const res = await fetch('/api/settings', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          key: 'ordering_enabled',
-          value: !orderingEnabled,
-        }),
-      })
-
-      if (res.ok) {
-        setOrderingEnabled(!orderingEnabled)
-        setMessage({
-          type: 'success',
-          text: !orderingEnabled ? 'Now accepting orders' : 'Ordering has been closed',
-        })
-      } else {
-        setMessage({ type: 'error', text: 'Failed to update ordering status' })
-      }
-    } catch (error) {
-      console.error('Error toggling ordering:', error)
-      setMessage({ type: 'error', text: 'Failed to update ordering status' })
-    } finally {
-      setTogglingOrdering(false)
-    }
-  }
 
   // Add new pickup date
   async function handleAddDate() {
@@ -301,39 +257,6 @@ export default function PickupDatesPage() {
           {message.text}
         </div>
       )}
-
-      {/* Quick Controls */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-        <h2 className="text-lg font-heading text-brand-brown mb-4 flex items-center gap-2">
-          <Zap className="w-5 h-5 text-yellow-500" />
-          Quick Controls
-        </h2>
-
-        <div className="space-y-4">
-          {/* Accept New Orders Toggle */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-brand-brown">Accept New Orders</p>
-              <p className={`text-sm ${orderingEnabled ? 'text-brand-green' : 'text-red-500'}`}>
-                {orderingEnabled ? 'Currently accepting orders' : 'Not accepting orders'}
-              </p>
-            </div>
-            <button
-              onClick={handleToggleOrdering}
-              disabled={togglingOrdering}
-              className={`relative w-14 h-8 rounded-full transition-colors ${
-                orderingEnabled ? 'bg-brand-brown' : 'bg-gray-300'
-              } ${togglingOrdering ? 'opacity-50' : ''}`}
-            >
-              <span
-                className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-transform ${
-                  orderingEnabled ? 'translate-x-7' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* Pickup Dates */}
       <div className="bg-white rounded-lg shadow-sm p-6">

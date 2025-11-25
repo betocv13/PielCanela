@@ -507,7 +507,7 @@ export default function CheckoutPanel() {
                     <div key={index} className="bg-gray-50 rounded-lg p-3">
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex-1">
-                          <h4 className="font-medium text-brand-brown">
+                          <h4 className="font-body font-medium text-brand-brown">
                             {item.productName}
                           </h4>
                           <div className="text-xs text-gray-500 space-y-0.5">
