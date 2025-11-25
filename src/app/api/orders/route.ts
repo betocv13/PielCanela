@@ -215,40 +215,25 @@ export async function POST(request: Request) {
       )
     }
 
-    // Send email notifications (don't block order creation if emails fail)
+    // Send admin notification email (don't block order creation if email fails)
     try {
-      const emailData = {
-        orderNumber: order.order_number,
-        customerName: order.customer_name,
-        customerEmail: order.customer_email || '',
-        customerPhone: order.customer_phone,
-        items: order.items,
-        subtotal: order.subtotal,
-        tax: order.tax,
-        total: order.total,
-        paymentMethod: order.payment_method,
-        pickupDate: order.pickup_date,
-        pickupTime: order.pickup_time,
-        specialNotes: order.special_notes || undefined,
-      }
-
-      // Send customer confirmation email
-      if (order.customer_email) {
-        const customerEmailHtml = generateCustomerOrderEmail(emailData)
-        await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/send-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: order.customer_email,
-            subject: `Order Confirmation - Piel Canela #${order.order_number}`,
-            html: customerEmailHtml,
-          }),
-        })
-      }
-
-      // Send admin notification email
       const adminEmail = settings.admin_email as string
       if (adminEmail) {
+        const emailData = {
+          orderNumber: order.order_number,
+          customerName: order.customer_name,
+          customerEmail: order.customer_email || '',
+          customerPhone: order.customer_phone,
+          items: order.items,
+          subtotal: order.subtotal,
+          tax: order.tax,
+          total: order.total,
+          paymentMethod: order.payment_method,
+          pickupDate: order.pickup_date,
+          pickupTime: order.pickup_time,
+          specialNotes: order.special_notes || undefined,
+        }
+
         const adminEmailHtml = generateAdminOrderEmail(emailData)
         await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/send-email`, {
           method: 'POST',
@@ -262,7 +247,7 @@ export async function POST(request: Request) {
       }
     } catch (emailError) {
       // Log error but don't fail the order creation
-      console.error('Error sending email notifications:', emailError)
+      console.error('Error sending admin email notification:', emailError)
     }
 
     return NextResponse.json({ order }, { status: 201 })
