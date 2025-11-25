@@ -3,12 +3,14 @@
 @tailwind utilities;
 
 /* Font face declarations */
-/* Note: Add TAN-Songbird.woff2 font file to /public/fonts/ directory */
+/* Note: Add TAN-Songbird font files to /public/fonts/ directory */
 /* The font will fall back to Georgia if the file is not present */
 @font-face {
   font-family: 'TAN Songbird';
   src: local('TAN Songbird'),
-       url('/fonts/TAN-Songbird.woff2') format('woff2');
+       url('/fonts/TAN-Songbird.woff2') format('woff2'),
+       url('/fonts/TAN-Songbird.ttf') format('truetype'),
+       url('/fonts/TAN-Songbird.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
