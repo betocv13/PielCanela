@@ -97,6 +97,7 @@ export async function POST(request: Request) {
     for (const setting of settingsData || []) {
       settings[setting.key] = setting.value
     }
+    console.log('All settings:', JSON.stringify(settings, null, 2))
 
     const maxOrdersPerSlot = Number(settings.max_orders_per_slot) || 2
     const defaultTaxRate = Number(settings.default_tax_rate) || 0
@@ -219,6 +220,8 @@ export async function POST(request: Request) {
     try {
       const adminEmail = settings.admin_email as string
       console.log('Admin email from settings:', adminEmail)
+      console.log('Admin email type:', typeof adminEmail)
+      console.log('Admin email raw value:', JSON.stringify(settings.admin_email))
 
       if (adminEmail) {
         const emailData = {
