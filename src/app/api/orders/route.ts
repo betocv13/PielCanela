@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import type { CreateOrderPayload } from '@/types'
-import { generateCustomerOrderEmail, generateAdminOrderEmail } from '@/lib/emailTemplates'
+import { generateAdminOrderEmail } from '@/lib/emailTemplates'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
