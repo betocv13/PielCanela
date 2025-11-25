@@ -1,15 +1,22 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle, ChevronLeft } from 'lucide-react'
+import Image from 'next/image'
+import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle, ChevronLeft, Banknote, Smartphone, ExternalLink } from 'lucide-react'
 import { useCart } from '@/components/providers/CartProvider'
-import { formatPrice } from '@/lib/utils'
-import PaymentOptions from './PaymentOptions'
+import { formatPrice, generateVenmoLink, generateCashAppLink } from '@/lib/utils'
 
 interface AvailableSlot {
   date: string
   displayDate: string
   slots: string[]
+}
+
+interface PaymentSettings {
+  venmo_username: string
+  cashapp_username: string
+  venmo_qr_url: string
+  cashapp_qr_url: string
 }
 
 // Format 24-hour time to 12-hour format (e.g., "20:30" -> "8:30 PM")
@@ -51,6 +58,9 @@ export default function CheckoutPanel() {
   const [tax, setTax] = useState(0)
   const total = subtotal + tax
 
+  // Payment settings for success screen
+  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings | null>(null)
+
   // Lock body scroll when panel is open (works on iOS too)
   useEffect(() => {
     if (isCartOpen) {
@@ -81,6 +91,30 @@ export default function CheckoutPanel() {
       document.body.style.overflow = ''
     }
   }, [isCartOpen])
+
+  // Fetch payment settings when order is complete
+  useEffect(() => {
+    async function fetchPaymentSettings() {
+      if (!orderComplete) return
+
+      try {
+        const res = await fetch('/api/settings')
+        if (res.ok) {
+          const data = await res.json()
+          setPaymentSettings({
+            venmo_username: data.settings.venmo_username || '',
+            cashapp_username: data.settings.cashapp_username || '',
+            venmo_qr_url: data.settings.venmo_qr_url || '',
+            cashapp_qr_url: data.settings.cashapp_qr_url || ''
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching payment settings:', error)
+      }
+    }
+
+    fetchPaymentSettings()
+  }, [orderComplete])
 
   const fetchAvailableSlots = useCallback(async () => {
     setLoadingSlots(true)
@@ -245,29 +279,148 @@ export default function CheckoutPanel() {
 
   // Order complete screen
   if (orderComplete) {
+    // Generate payment links
+    const venmoLinks = paymentSettings && orderNumber && total
+      ? generateVenmoLink(paymentSettings.venmo_username, total, orderNumber)
+      : null
+
+    const cashappLink = paymentSettings && total
+      ? generateCashAppLink(paymentSettings.cashapp_username, total)
+      : null
+
     return (
       <div className="fixed inset-0 z-50">
         <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
-        <div className="absolute right-0 top-0 h-full w-full md:max-w-lg bg-white shadow-xl flex flex-col">
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-            <CheckCircle className="w-20 h-20 text-green-500 mb-6" />
-            <h2 className="text-3xl font-body font-bold text-brand-brown mb-3">Order Placed!</h2>
-            <p className="text-lg text-gray-600 mb-2">
-              Your order number is
-            </p>
-            <p className="text-2xl font-bold text-brand-brown mb-6">
-              #{orderNumber}
-            </p>
-            <p className="text-gray-500 mb-8 max-w-sm">
-              Please arrive at your selected pickup time. We&apos;ll have your order ready!
-            </p>
-            <button
-              onClick={handleClose}
-              className="w-full max-w-xs bg-brand-brown text-white py-4 px-6 rounded-button font-semibold text-lg
-                         hover:bg-brand-brown/90 transition-colors"
-            >
-              Done
-            </button>
+        <div className="absolute right-0 top-0 h-full w-full md:max-w-lg bg-white shadow-xl flex flex-col overflow-y-auto">
+          <div className="flex-1 p-8">
+            {/* Success message */}
+            <div className="text-center mb-8">
+              <CheckCircle className="w-20 h-20 text-green-500 mb-6 mx-auto" />
+              <h2 className="text-3xl font-body font-bold text-brand-brown mb-3">Order Placed!</h2>
+              <p className="text-lg text-gray-600 mb-2">
+                Your order number is
+              </p>
+              <p className="text-2xl font-bold text-brand-brown mb-4">
+                #{orderNumber}
+              </p>
+              <p className="text-gray-500 max-w-sm mx-auto">
+                Please arrive at your selected pickup time. We&apos;ll have your order ready!
+              </p>
+            </div>
+
+            {/* Payment Information */}
+            {paymentMethod && paymentSettings && (
+              <div className="max-w-md mx-auto">
+                {/* Venmo Payment */}
+                {paymentMethod === 'venmo' && (
+                  <div className="p-6 bg-blue-50 rounded-lg border border-blue-100">
+                    <h3 className="font-body font-bold text-blue-800 mb-4 text-center text-lg">Complete Payment via Venmo</h3>
+
+                    {paymentSettings.venmo_qr_url && (
+                      <div className="flex justify-center mb-4">
+                        <Image
+                          src={paymentSettings.venmo_qr_url}
+                          alt="Venmo QR Code"
+                          width={200}
+                          height={200}
+                          className="rounded-lg"
+                        />
+                      </div>
+                    )}
+
+                    <p className="text-sm text-blue-700 mb-2 text-center">
+                      Send <strong className="text-lg">{formatPrice(total)}</strong> to{' '}
+                      <strong>{paymentSettings.venmo_username}</strong>
+                    </p>
+
+                    <p className="text-xs text-blue-600 mb-4 text-center">
+                      Include &quot;Order-{orderNumber}&quot; in the note
+                    </p>
+
+                    {venmoLinks && (
+                      <div className="space-y-2">
+                        <a
+                          href={venmoLinks.deepLink}
+                          className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                        >
+                          <Smartphone className="w-5 h-5" />
+                          Open Venmo App
+                        </a>
+                        <a
+                          href={venmoLinks.webLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 w-full py-3 px-4 border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors font-medium"
+                        >
+                          <ExternalLink className="w-5 h-5" />
+                          Open in Browser
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Cash App Payment */}
+                {paymentMethod === 'cashapp' && (
+                  <div className="p-6 bg-green-50 rounded-lg border border-green-100">
+                    <h3 className="font-body font-bold text-green-800 mb-4 text-center text-lg">Complete Payment via Cash App</h3>
+
+                    {paymentSettings.cashapp_qr_url && (
+                      <div className="flex justify-center mb-4">
+                        <Image
+                          src={paymentSettings.cashapp_qr_url}
+                          alt="Cash App QR Code"
+                          width={200}
+                          height={200}
+                          className="rounded-lg"
+                        />
+                      </div>
+                    )}
+
+                    <p className="text-sm text-green-700 mb-4 text-center">
+                      Send <strong className="text-lg">{formatPrice(total)}</strong> to{' '}
+                      <strong>{paymentSettings.cashapp_username}</strong>
+                    </p>
+
+                    {cashappLink && (
+                      <a
+                        href={cashappLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
+                      >
+                        <ExternalLink className="w-5 h-5" />
+                        Open Cash App
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                {/* Cash Payment */}
+                {paymentMethod === 'cash' && (
+                  <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <h3 className="font-body font-bold text-gray-800 mb-4 text-center text-lg">Cash Payment at Pickup</h3>
+                    <p className="text-sm text-gray-600 text-center mb-3">
+                      Please bring exact change if possible. Payment is due at pickup.
+                    </p>
+                    <p className="text-2xl font-bold text-brand-brown text-center">
+                      Total due: {formatPrice(total)}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Done button */}
+            <div className="mt-8 max-w-md mx-auto">
+              <button
+                onClick={handleClose}
+                className="w-full bg-brand-brown text-white py-4 px-6 rounded-button font-semibold text-lg
+                           hover:bg-brand-brown/90 transition-colors"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -518,12 +671,52 @@ export default function CheckoutPanel() {
               {/* Step 3: Payment */}
               {step === 3 && (
                 <div className="space-y-4">
-                  <PaymentOptions
-                    selectedMethod={paymentMethod}
-                    onSelect={setPaymentMethod}
-                    orderNumber={orderNumber || 'pending'}
-                    total={total}
-                  />
+                  <h3 className="text-lg font-body font-bold text-brand-brown">Payment Method</h3>
+
+                  <div className="grid gap-3">
+                    {[
+                      { id: 'cash' as const, name: 'Cash', description: 'Pay when you pick up', icon: Banknote, color: 'text-green-600' },
+                      { id: 'venmo' as const, name: 'Venmo', description: 'Pay via Venmo app', icon: Smartphone, color: 'text-blue-500' },
+                      { id: 'cashapp' as const, name: 'Cash App', description: 'Pay via Cash App', icon: Smartphone, color: 'text-green-500' }
+                    ].map((method) => {
+                      const Icon = method.icon
+                      const isSelected = paymentMethod === method.id
+
+                      return (
+                        <button
+                          key={method.id}
+                          type="button"
+                          onClick={() => setPaymentMethod(method.id)}
+                          className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-all text-left ${
+                            isSelected
+                              ? 'border-brand-brown bg-brand-cream'
+                              : 'border-gray-200 hover:border-brand-brown/50'
+                          }`}
+                        >
+                          <div className={`p-2 rounded-lg bg-gray-100 ${method.color}`}>
+                            <Icon className="w-6 h-6" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-brand-brown">{method.name}</p>
+                            <p className="text-sm text-brand-brown/60">{method.description}</p>
+                          </div>
+                          <div
+                            className={`w-5 h-5 rounded-full border-2 ${
+                              isSelected
+                                ? 'border-brand-brown bg-brand-brown'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {isSelected && (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <div className="w-2 h-2 rounded-full bg-white" />
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
 
                   {error && (
                     <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
