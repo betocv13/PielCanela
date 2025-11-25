@@ -32,6 +32,7 @@ export interface Product {
   sizes: SizeOption[]
   milk_options: MilkOption[]
   addons: AddonOption[]
+  has_temperature: boolean  // Enable hot/cold selection
   tax_rate: number | null  // Per-product tax rate (percentage), null uses default
   created_at: string
   updated_at: string
@@ -43,6 +44,7 @@ export interface OrderItem {
   productName: string
   quantity: number
   size: string | null
+  temperature: string | null  // 'hot' or 'cold'
   milk: string | null
   addons: string[]
   specialInstructions: string | null
@@ -151,6 +153,7 @@ export interface ProductFormData {
   category: string
   base_price: number
   sizes: SizeOption[]
+  has_temperature: boolean
   milk_options: MilkOption[]
   addons: AddonOption[]
   available: boolean

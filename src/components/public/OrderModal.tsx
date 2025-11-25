@@ -16,6 +16,7 @@ interface OrderModalProps {
 export default function OrderModal({ product, isOpen, onClose }: OrderModalProps) {
   const { addItem } = useCart()
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
+  const [selectedTemperature, setSelectedTemperature] = useState<string | null>(null)
   const [selectedMilk, setSelectedMilk] = useState<string | null>(null)
   const [selectedAddons, setSelectedAddons] = useState<string[]>([])
   const [quantity, setQuantity] = useState(1)
@@ -72,6 +73,12 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
         setSelectedSize(product.sizes[0].name)
       } else {
         setSelectedSize(null)
+      }
+      // Set default temperature if available
+      if (product.has_temperature) {
+        setSelectedTemperature('hot')
+      } else {
+        setSelectedTemperature(null)
       }
       // Set default milk if available
       // Find first product milk option that exists in global options
@@ -164,6 +171,7 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
       productName: product.name,
       quantity,
       size: selectedSize,
+      temperature: selectedTemperature,
       milk: selectedMilk,
       addons: selectedAddons,
       specialInstructions: specialInstructions || null,
@@ -243,6 +251,35 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
                     </button>
                   )
                 })}
+              </div>
+            </div>
+          )}
+
+          {/* Temperature selection */}
+          {product.has_temperature && (
+            <div className="mb-4">
+              <h3 className="font-body font-medium text-brand-brown mb-2">Temperature</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setSelectedTemperature('hot')}
+                  className={`py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                    selectedTemperature === 'hot'
+                      ? 'border-brand-brown bg-brand-cream'
+                      : 'border-gray-200 hover:border-brand-brown/50'
+                  }`}
+                >
+                  Hot
+                </button>
+                <button
+                  onClick={() => setSelectedTemperature('cold')}
+                  className={`py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                    selectedTemperature === 'cold'
+                      ? 'border-brand-brown bg-brand-cream'
+                      : 'border-gray-200 hover:border-brand-brown/50'
+                  }`}
+                >
+                  Cold
+                </button>
               </div>
             </div>
           )}

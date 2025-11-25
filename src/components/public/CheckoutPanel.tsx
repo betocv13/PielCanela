@@ -212,6 +212,7 @@ export default function CheckoutPanel() {
         productName: item.productName,
         quantity: item.quantity,
         size: item.size,
+        temperature: item.temperature,
         milk: item.milk,
         addons: item.addons,
         specialInstructions: item.specialInstructions,
@@ -512,6 +513,7 @@ export default function CheckoutPanel() {
                           </h4>
                           <div className="text-xs text-gray-500 space-y-0.5">
                             {item.size && <p>Size: {item.size}</p>}
+                            {item.temperature && <p>Temperature: {item.temperature.charAt(0).toUpperCase() + item.temperature.slice(1)}</p>}
                             {item.milk && <p>Milk: {item.milk}</p>}
                             {item.addons && item.addons.length > 0 && (
                               <p>Add-ons: {item.addons.join(', ')}</p>

@@ -19,6 +19,7 @@ interface ProductFormData {
   category: string
   base_price: number
   sizes: SizeOption[]
+  has_temperature: boolean
   milk_options: MilkOption[]
   addons: AddonOption[]
   available: boolean
@@ -66,6 +67,7 @@ export default function ProductModal({
     category: 'coffee',
     base_price: 0,
     sizes: [],
+    has_temperature: false,
     milk_options: [],
     addons: [],
     available: true,
@@ -144,6 +146,7 @@ export default function ProductModal({
         category: product.category,
         base_price: product.base_price,
         sizes: product.sizes,
+        has_temperature: product.has_temperature || false,
         milk_options: product.milk_options,
         addons: product.addons,
         available: product.available,
@@ -626,28 +629,53 @@ export default function ProductModal({
               <h3 className="text-sm font-semibold text-brand-brown uppercase tracking-wide mb-4">
                 Availability
               </h3>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-700">Available for Ordering:</span>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, available: !formData.available })}
-                  className="flex items-center gap-2"
-                >
-                  <span className={`text-sm font-medium ${formData.available ? 'text-green-600' : 'text-gray-400'}`}>
-                    {formData.available ? 'ON' : 'OFF'}
-                  </span>
-                  <div
-                    className={`relative w-12 h-6 rounded-full transition-colors ${
-                      formData.available ? 'bg-brand-brown' : 'bg-gray-300'
-                    }`}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700">Available for Ordering:</span>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, available: !formData.available })}
+                    className="flex items-center gap-2"
                   >
+                    <span className={`text-sm font-medium ${formData.available ? 'text-green-600' : 'text-gray-400'}`}>
+                      {formData.available ? 'ON' : 'OFF'}
+                    </span>
                     <div
-                      className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
-                        formData.available ? 'translate-x-7' : 'translate-x-1'
+                      className={`relative w-12 h-6 rounded-full transition-colors ${
+                        formData.available ? 'bg-brand-brown' : 'bg-gray-300'
                       }`}
-                    />
-                  </div>
-                </button>
+                    >
+                      <div
+                        className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                          formData.available ? 'translate-x-7' : 'translate-x-1'
+                        }`}
+                      />
+                    </div>
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700">Hot/Cold Option:</span>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, has_temperature: !formData.has_temperature })}
+                    className="flex items-center gap-2"
+                  >
+                    <span className={`text-sm font-medium ${formData.has_temperature ? 'text-green-600' : 'text-gray-400'}`}>
+                      {formData.has_temperature ? 'ON' : 'OFF'}
+                    </span>
+                    <div
+                      className={`relative w-12 h-6 rounded-full transition-colors ${
+                        formData.has_temperature ? 'bg-brand-brown' : 'bg-gray-300'
+                      }`}
+                    >
+                      <div
+                        className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                          formData.has_temperature ? 'translate-x-7' : 'translate-x-1'
+                        }`}
+                      />
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
 
