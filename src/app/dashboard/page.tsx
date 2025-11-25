@@ -131,6 +131,12 @@ export default function OrdersPage() {
     }
   }
 
+  const handleCancelOrder = (orderId: string) => {
+    if (window.confirm('Are you sure you want to cancel this order? This will free up the time slot.')) {
+      updateOrderStatus(orderId, 'cancelled')
+    }
+  }
+
   const updatePaymentStatus = async (orderId: string, confirmed: boolean) => {
     const supabase = createClient()
 
@@ -452,7 +458,7 @@ export default function OrdersPage() {
                     Done
                   </button>
                   <button
-                    onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                    onClick={() => handleCancelOrder(order.id)}
                     className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                       order.status === 'cancelled'
                         ? 'bg-red-600 text-white'

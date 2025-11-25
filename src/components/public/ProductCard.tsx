@@ -31,7 +31,7 @@ export default function ProductCard({ product, onOrder }: ProductCardProps) {
 
       {/* Product Info */}
       <div className="p-4 flex flex-col flex-grow">
-        <h3 className="font-semibold text-brand-brown text-lg mb-1">
+        <h3 className="font-body font-semibold text-brand-brown text-lg mb-1">
           {product.name}
         </h3>
         <p className="text-sm text-gray-600 mb-3 line-clamp-2 flex-grow">

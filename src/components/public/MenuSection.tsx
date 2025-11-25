@@ -101,12 +101,12 @@ export default function MenuSection({ products, onOrderProduct, loading = false 
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-8">
+        <div className="flex overflow-x-auto md:flex-wrap md:justify-center gap-2 md:gap-3 mb-8 pb-2 md:pb-0 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => setActiveCategory(category.id)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                 activeCategory === category.id
                   ? 'bg-brand-brown text-white'
                   : 'bg-white text-brand-brown border border-brand-brown/30 hover:border-brand-brown'
