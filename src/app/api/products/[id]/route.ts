@@ -82,6 +82,7 @@ export async function PUT(
         image_url: productData.image_url || null,
         available: productData.available,
         sizes: productData.sizes,
+        has_temperature: productData.has_temperature || false,
         milk_options: productData.milk_options,
         addons: productData.addons,
         updated_at: new Date().toISOString(),

@@ -26,6 +26,7 @@ export const orderItemSchema = z.object({
   productName: z.string(),
   quantity: z.number().min(1).max(10),
   size: z.string().nullable(),
+  temperature: z.string().nullable(),
   milk: z.string().nullable(),
   addons: z.array(z.string()),
   specialInstructions: z.string().max(200).nullable(),
@@ -73,6 +74,7 @@ export const productFormSchema = z.object({
       })
     )
     .min(1, 'At least one size is required'),
+  has_temperature: z.boolean(),
   milk_options: z.array(
     z.object({
       name: z.string().min(1),

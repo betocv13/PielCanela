@@ -86,6 +86,7 @@ export async function POST(request: Request) {
         image_url: productData.image_url || null,
         available: productData.available,
         sizes: productData.sizes,
+        has_temperature: productData.has_temperature || false,
         milk_options: productData.milk_options,
         addons: productData.addons,
       })
