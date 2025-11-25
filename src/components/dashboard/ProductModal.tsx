@@ -184,6 +184,7 @@ export default function ProductModal({
         category: 'coffee',
         base_price: 0,
         sizes: [],
+        has_temperature: false,
         milk_options: [],
         addons: [],
         available: true,
