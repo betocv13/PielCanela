@@ -16,13 +16,6 @@ export default async function Home() {
     console.error('Error fetching products:', error)
   }
 
-  // Fetch about section header
-  const { data: aboutSection } = await supabase
-    .from('about_section')
-    .select('*')
-    .eq('active', true)
-    .single()
-
   // Fetch about items
   const { data: aboutItems } = await supabase
     .from('about_items')
@@ -33,7 +26,6 @@ export default async function Home() {
   return (
     <HomeClient
       products={products || []}
-      aboutSection={aboutSection}
       aboutItems={aboutItems || []}
     />
   )

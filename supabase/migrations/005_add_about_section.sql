@@ -25,28 +25,6 @@ CREATE TRIGGER update_about_items_updated_at
   BEFORE UPDATE ON about_items
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- =====================
--- ABOUT_SECTION TABLE (for header and subtitle)
--- =====================
-CREATE TABLE about_section (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  heading TEXT NOT NULL,
-  subtitle TEXT NOT NULL,
-  active BOOLEAN DEFAULT true,
-
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Create trigger for updated_at
-CREATE TRIGGER update_about_section_updated_at
-  BEFORE UPDATE ON about_section
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- Seed initial data for about section header
-INSERT INTO about_section (heading, subtitle) VALUES
-  ('HECHO CON AMOR', 'Cafe y Matcha, pero con un toque Mexicano. 100% confident you''ll love every single one!');
-
 -- Seed initial about items (4 items with placeholders)
 -- Update these image URLs with your actual Supabase Storage URLs
 INSERT INTO about_items (title, description, image_url, display_order) VALUES
@@ -61,18 +39,10 @@ INSERT INTO about_items (title, description, image_url, display_order) VALUES
 
 -- Enable RLS
 ALTER TABLE about_items ENABLE ROW LEVEL SECURITY;
-ALTER TABLE about_section ENABLE ROW LEVEL SECURITY;
 
 -- About items policies
 CREATE POLICY "Public can view active about items" ON about_items
   FOR SELECT USING (active = true);
 
 CREATE POLICY "Authenticated users can manage about items" ON about_items
-  FOR ALL USING (auth.role() = 'authenticated');
-
--- About section policies
-CREATE POLICY "Public can view active about section" ON about_section
-  FOR SELECT USING (active = true);
-
-CREATE POLICY "Authenticated users can manage about section" ON about_section
   FOR ALL USING (auth.role() = 'authenticated');

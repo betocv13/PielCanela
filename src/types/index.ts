@@ -211,12 +211,3 @@ export interface AboutItem {
   created_at: string
   updated_at: string
 }
-
-export interface AboutSection {
-  id: string
-  heading: string
-  subtitle: string
-  active: boolean
-  created_at: string
-  updated_at: string
-}

@@ -1,19 +1,18 @@
 'use client'
 
-import { AboutItem, AboutSection as AboutSectionType } from '@/types'
+import { AboutItem } from '@/types'
 import Image from 'next/image'
 import { useState } from 'react'
 
 interface AboutSectionProps {
-  section: AboutSectionType | null
   items: AboutItem[]
 }
 
-export default function AboutSection({ section, items }: AboutSectionProps) {
+export default function AboutSection({ items }: AboutSectionProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
-  // Don't render if no section data
-  if (!section || items.length === 0) {
+  // Don't render if no items
+  if (items.length === 0) {
     return null
   }
 
@@ -28,14 +27,14 @@ export default function AboutSection({ section, items }: AboutSectionProps) {
           {/* Left: Large Heading */}
           <div>
             <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading text-brand-brown leading-tight">
-              {section.heading}
+              HECHO CON AMOR
             </h2>
           </div>
 
           {/* Right: Subtitle Text */}
           <div>
             <p className="text-lg md:text-xl text-brand-brown/80 leading-relaxed">
-              {section.subtitle}
+              Cafe y Matcha, pero con un toque Mexicano. 100% confident you&apos;ll love every single one!
             </p>
           </div>
         </div>
