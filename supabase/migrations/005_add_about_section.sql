@@ -48,11 +48,12 @@ INSERT INTO about_section (heading, subtitle) VALUES
   ('HECHO CON AMOR', 'Cafe y Matcha, pero con un toque Mexicano. 100% confident you''ll love every single one!');
 
 -- Seed initial about items (4 items with placeholders)
+-- Update these image URLs with your actual Supabase Storage URLs
 INSERT INTO about_items (title, description, image_url, display_order) VALUES
-  ('Made with love', 'Tasty Authentic Coffee, made with real ingredients', '/images/about-1.jpg', 1),
-  ('Made with love', 'Fresh matcha sourced from the finest farms', '/images/about-2.jpg', 2),
-  ('Made with love', 'Handcrafted with care at every step', '/images/about-3.jpg', 3),
-  ('Made with love', 'Authentic flavors that bring joy', '/images/about-4.jpg', 4);
+  ('Made with love', 'Tasty Authentic Coffee, made with real ingredients', 'https://eobgaersvyjrbvykqqug.supabase.co/storage/v1/object/public/About/IMG_3671.jpg', 1),
+  ('Made with love', 'Fresh matcha sourced from the finest farms', 'https://eobgaersvyjrbvykqqug.supabase.co/storage/v1/object/public/About/IMG_3672.jpg', 2),
+  ('Made with love', 'Handcrafted with care at every step', 'https://eobgaersvyjrbvykqqug.supabase.co/storage/v1/object/public/About/IMG_3673.jpg', 3),
+  ('Made with love', 'Authentic flavors that bring joy', 'https://eobgaersvyjrbvykqqug.supabase.co/storage/v1/object/public/About/IMG_3674.jpg', 4);
 
 -- =====================
 -- ROW LEVEL SECURITY
