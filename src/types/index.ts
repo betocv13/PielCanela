@@ -199,3 +199,24 @@ export interface DashboardStats {
   upcomingOrders: number
   todaysRevenue: number
 }
+
+// About section types
+export interface AboutItem {
+  id: string
+  title: string
+  description: string
+  image_url: string
+  display_order: number
+  active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface AboutSection {
+  id: string
+  heading: string
+  subtitle: string
+  active: boolean
+  created_at: string
+  updated_at: string
+}

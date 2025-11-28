@@ -1,19 +1,22 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Product } from '@/types'
+import { Product, AboutItem, AboutSection as AboutSectionType } from '@/types'
 import Header from './Header'
 import Hero from './Hero'
 import MenuSection from './MenuSection'
+import AboutSection from './AboutSection'
 import Footer from './Footer'
 import OrderModal from './OrderModal'
 import CheckoutPanel from './CheckoutPanel'
 
 interface HomeClientProps {
   products: Product[]
+  aboutSection: AboutSectionType | null
+  aboutItems: AboutItem[]
 }
 
-export default function HomeClient({ products }: HomeClientProps) {
+export default function HomeClient({ products, aboutSection, aboutItems }: HomeClientProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
@@ -43,6 +46,7 @@ export default function HomeClient({ products }: HomeClientProps) {
       <Header transparent={!isScrolled} />
       <Hero />
       <MenuSection products={products} onOrderProduct={handleOrderProduct} />
+      <AboutSection section={aboutSection} items={aboutItems} />
       <Footer />
 
       {/* Order Modal */}
