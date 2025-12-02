@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface AboutItem {
   id: string
@@ -17,6 +16,7 @@ export default function AboutSection() {
   const [items, setItems] = useState<AboutItem[]>([])
   const [loading, setLoading] = useState(true)
   const [currentSlide, setCurrentSlide] = useState(0)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     async function fetchAboutItems() {
@@ -36,13 +36,21 @@ export default function AboutSection() {
     fetchAboutItems()
   }, [])
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % items.length)
-  }
+  // Update currentSlide based on scroll position
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + items.length) % items.length)
-  }
+    const handleScroll = () => {
+      const scrollLeft = container.scrollLeft
+      const itemWidth = container.offsetWidth
+      const newSlide = Math.round(scrollLeft / itemWidth)
+      setCurrentSlide(newSlide)
+    }
+
+    container.addEventListener('scroll', handleScroll)
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [])
 
   if (loading || items.length === 0) {
     return null
@@ -56,8 +64,8 @@ export default function AboutSection() {
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading text-brand-brown mb-4">
             Plant Protein to fuel your Body and Soul...
           </h2>
-          <p className="text-lg md:text-xl text-brand-brown/80 max-w-3xl mx-auto">
-            The creamiest smoothies are in your future! We've perfected our flavors and we are 100% confident you'll love every single one!
+          <p className="text-base md:text-lg text-brand-brown/80 max-w-3xl mx-auto">
+            Cafe Y Matcha con un toque Mexicano
           </p>
         </div>
 
@@ -66,7 +74,7 @@ export default function AboutSection() {
           {items.map((item) => (
             <div
               key={item.id}
-              className="relative aspect-square rounded-xl overflow-hidden group"
+              className="relative aspect-[4/5] rounded-xl overflow-hidden group cursor-pointer"
             >
               <Image
                 src={item.image_url}
@@ -74,8 +82,8 @@ export default function AboutSection() {
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-black/20 transition-opacity duration-300 group-hover:bg-black/30" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+              <div className="absolute inset-0 bg-transparent transition-colors duration-300 group-hover:bg-brand-brown/50" />
+              <div className="absolute bottom-0 left-0 p-6 text-left">
                 <h3 className="text-white text-2xl font-heading font-bold mb-2 drop-shadow-lg">
                   {item.title}
                 </h3>
@@ -87,60 +95,51 @@ export default function AboutSection() {
           ))}
         </div>
 
-        {/* Mobile Carousel */}
-        <div className="md:hidden relative">
-          <div className="relative aspect-square rounded-xl overflow-hidden">
-            <Image
-              src={items[currentSlide].image_url}
-              alt={items[currentSlide].title}
-              fill
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-black/20" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-              <h3 className="text-white text-3xl font-heading font-bold mb-3 drop-shadow-lg">
-                {items[currentSlide].title}
-              </h3>
-              <p className="text-white text-base drop-shadow-lg opacity-90">
-                {items[currentSlide].description}
-              </p>
-            </div>
+        {/* Mobile Swipeable Row */}
+        <div className="md:hidden">
+          <div
+            ref={scrollContainerRef}
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4"
+            style={{ scrollSnapType: 'x mandatory' }}
+          >
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="relative flex-shrink-0 w-full aspect-[4/5] rounded-xl overflow-hidden snap-start"
+              >
+                <Image
+                  src={item.image_url}
+                  alt={item.title}
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-black/20" />
+                <div className="absolute bottom-0 left-0 p-6 text-left">
+                  <h3 className="text-white text-2xl font-heading font-bold mb-2 drop-shadow-lg">
+                    {item.title}
+                  </h3>
+                  <p className="text-white text-sm drop-shadow-lg opacity-90">
+                    {item.description}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* Carousel Controls */}
+          {/* Dots Indicator */}
           {items.length > 1 && (
-            <>
-              <button
-                onClick={prevSlide}
-                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-brand-brown rounded-full p-2 shadow-lg transition-colors"
-                aria-label="Previous item"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-              <button
-                onClick={nextSlide}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-brand-brown rounded-full p-2 shadow-lg transition-colors"
-                aria-label="Next item"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-
-              {/* Dots Indicator */}
-              <div className="flex justify-center gap-2 mt-4">
-                {items.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      index === currentSlide
-                        ? 'bg-brand-brown w-6'
-                        : 'bg-brand-brown/30'
-                    }`}
-                    aria-label={`Go to slide ${index + 1}`}
-                  />
-                ))}
-              </div>
-            </>
+            <div className="flex justify-center gap-2 mt-4">
+              {items.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === currentSlide
+                      ? 'bg-brand-brown w-6'
+                      : 'bg-brand-brown/30'
+                  }`}
+                />
+              ))}
+            </div>
           )}
         </div>
       </div>
