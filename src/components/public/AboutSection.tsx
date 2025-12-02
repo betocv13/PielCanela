@@ -62,7 +62,7 @@ export default function AboutSection() {
         {/* Header */}
         <div className="mb-12">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-8">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading text-brand-brown md:flex-1">
+            <h2 style={{ lineHeight: 2.0 }} className="text-2xl md:text-3xl lg:text-3xl font-heading text-brand-brown md:flex-1">
               Cafe Y Matcha con un toque Mexicano
             </h2>
             <p className="text-base md:text-lg text-brand-brown/80 md:flex-1">
@@ -84,9 +84,9 @@ export default function AboutSection() {
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-transparent transition-colors duration-300 group-hover:bg-brand-brown/50" />
-              <div className="absolute bottom-0 left-0 p-6 text-left">
-                <h3 className="text-white text-xl font-heading font-bold mb-2 drop-shadow-lg">
+              <div className="absolute inset-0 bg-transparent transition-colors duration-300 group-hover:bg-brand-pink/80" />
+              <div className="absolute bottom-0 left-0 p-3 text-left">
+                <h3 className="text-white text-md font-heading font-bold mb-2 drop-shadow-lg">
                   {item.title}
                 </h3>
                 <p className="text-white text-sm drop-shadow-lg opacity-90">
@@ -107,7 +107,7 @@ export default function AboutSection() {
             {items.map((item) => (
               <div
                 key={item.id}
-                className="relative flex-shrink-0 w-full aspect-[4/5] rounded-xl overflow-hidden snap-start"
+                className="relative flex-shrink-0 w-full aspect-[5/5] rounded-xl overflow-hidden snap-start"
               >
                 <Image
                   src={item.image_url}
@@ -115,8 +115,8 @@ export default function AboutSection() {
                   fill
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-black/20" />
-                <div className="absolute bottom-0 left-0 p-6 text-left">
+                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-brand-pink to-transparent" />
+                <div className="absolute bottom-0 left-0 p-3 text-left">
                   <h3 className="text-white text-xl font-heading font-bold mb-2 drop-shadow-lg">
                     {item.title}
                   </h3>
