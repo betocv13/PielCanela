@@ -60,13 +60,15 @@ export default function AboutSection() {
     <section className="py-16 px-4 bg-brand-cream">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading text-brand-brown mb-4">
-            Plant Protein to fuel your Body and Soul...
-          </h2>
-          <p className="text-base md:text-lg text-brand-brown/80 max-w-3xl mx-auto">
-            Cafe Y Matcha con un toque Mexicano
-          </p>
+        <div className="mb-12">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-8">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading text-brand-brown md:flex-1">
+              Cafe Y Matcha con un toque Mexicano
+            </h2>
+            <p className="text-base md:text-lg text-brand-brown/80 md:flex-1">
+              Experience the perfect blend of traditional Mexican flavors with artisan coffee and matcha. Each drink is handcrafted with love, combining authentic ingredients to create a unique taste that celebrates our heritage. Delicious, authentic, and unforgettable.
+            </p>
+          </div>
         </div>
 
         {/* Desktop Grid - Hidden on mobile */}
@@ -84,7 +86,7 @@ export default function AboutSection() {
               />
               <div className="absolute inset-0 bg-transparent transition-colors duration-300 group-hover:bg-brand-brown/50" />
               <div className="absolute bottom-0 left-0 p-6 text-left">
-                <h3 className="text-white text-2xl font-heading font-bold mb-2 drop-shadow-lg">
+                <h3 className="text-white text-xl font-heading font-bold mb-2 drop-shadow-lg">
                   {item.title}
                 </h3>
                 <p className="text-white text-sm drop-shadow-lg opacity-90">
@@ -115,7 +117,7 @@ export default function AboutSection() {
                 />
                 <div className="absolute inset-0 bg-black/20" />
                 <div className="absolute bottom-0 left-0 p-6 text-left">
-                  <h3 className="text-white text-2xl font-heading font-bold mb-2 drop-shadow-lg">
+                  <h3 className="text-white text-xl font-heading font-bold mb-2 drop-shadow-lg">
                     {item.title}
                   </h3>
                   <p className="text-white text-sm drop-shadow-lg opacity-90">
