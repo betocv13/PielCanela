@@ -108,7 +108,7 @@ export default function MenuSection({ products, onOrderProduct, loading = false 
               onClick={() => setActiveCategory(category.id)}
               className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                 activeCategory === category.id
-                  ? 'bg-brand-brown text-white'
+                  ? 'bg-brand-pink text-white'
                   : 'bg-white text-brand-brown border border-brand-brown/30 hover:border-brand-brown'
               }`}
             >
@@ -168,8 +168,8 @@ export default function MenuSection({ products, onOrderProduct, loading = false 
                   onClick={() => scrollToSlide(index)}
                   className={`w-2 h-2 rounded-full transition-all duration-200 ${
                     currentSlide === index
-                      ? 'bg-brand-brown w-4'
-                      : 'bg-brand-brown/30'
+                      ? 'bg-brand-pink w-4'
+                      : 'bg-brand-pink/30'
                   }`}
                   aria-label={`Go to slide ${index + 1}`}
                 />

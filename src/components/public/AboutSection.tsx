@@ -153,8 +153,8 @@ export default function AboutSection() {
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all ${
                     index === currentSlide
-                      ? 'bg-brand-brown w-6'
-                      : 'bg-brand-brown/30'
+                      ? 'bg-brand-pink w-6'
+                      : 'bg-brand-pink/30'
                   }`}
                 />
               ))}
