@@ -51,7 +51,7 @@ export default function Footer() {
           setMessage('')
         }, 5000)
       }
-    } catch (error) {
+    } catch {
       setStatus('error')
       setMessage('An error occurred. Please try again.')
       setTimeout(() => {
