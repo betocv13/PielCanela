@@ -5,6 +5,7 @@ import { Product } from '@/types'
 import Header from './Header'
 import Hero from './Hero'
 import MenuSection from './MenuSection'
+import AboutSection from './AboutSection'
 import Footer from './Footer'
 import OrderModal from './OrderModal'
 import CheckoutPanel from './CheckoutPanel'
@@ -43,6 +44,7 @@ export default function HomeClient({ products }: HomeClientProps) {
       <Header transparent={!isScrolled} />
       <Hero />
       <MenuSection products={products} onOrderProduct={handleOrderProduct} />
+      <AboutSection />
       <Footer />
 
       {/* Order Modal */}
