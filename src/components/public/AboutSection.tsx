@@ -36,21 +36,38 @@ export default function AboutSection() {
     fetchAboutItems()
   }, [])
 
-  // Update currentSlide based on scroll position
+  // Update currentSlide based on scroll position using Intersection Observer
   useEffect(() => {
     const container = scrollContainerRef.current
     if (!container) return
 
-    const handleScroll = () => {
-      const scrollLeft = container.scrollLeft
-      const itemWidth = container.offsetWidth
-      const newSlide = Math.round(scrollLeft / itemWidth)
-      setCurrentSlide(newSlide)
+    const options = {
+      root: container,
+      threshold: 0.5, // Item is considered "current" when 50% visible
     }
 
-    container.addEventListener('scroll', handleScroll)
-    return () => container.removeEventListener('scroll', handleScroll)
-  }, [])
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          // Get the index of the intersecting item
+          const slides = Array.from(container.children)
+          const index = slides.indexOf(entry.target)
+          if (index !== -1) {
+            setCurrentSlide(index)
+          }
+        }
+      })
+    }, options)
+
+    // Observe all slide elements
+    Array.from(container.children).forEach((child) => {
+      observer.observe(child)
+    })
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [items])
 
   if (loading || items.length === 0) {
     return null
