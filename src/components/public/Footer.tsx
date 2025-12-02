@@ -1,9 +1,65 @@
-import Link from 'next/link'
+'use client'
+
+import { useState } from 'react'
 import Image from 'next/image'
 import { Instagram, Facebook } from 'lucide-react'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [message, setMessage] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!email.trim()) {
+      setStatus('error')
+      setMessage('Please enter an email address')
+      return
+    }
+
+    setStatus('loading')
+    setMessage('')
+
+    try {
+      const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setStatus('success')
+        setMessage('Successfully subscribed!')
+        setEmail('')
+        // Clear success message after 3 seconds
+        setTimeout(() => {
+          setStatus('idle')
+          setMessage('')
+        }, 3000)
+      } else {
+        setStatus('error')
+        setMessage(data.error || 'Failed to subscribe')
+        // Clear error message after 5 seconds
+        setTimeout(() => {
+          setStatus('idle')
+          setMessage('')
+        }, 5000)
+      }
+    } catch (error) {
+      setStatus('error')
+      setMessage('An error occurred. Please try again.')
+      setTimeout(() => {
+        setStatus('idle')
+        setMessage('')
+      }, 5000)
+    }
+  }
 
   return (
     <footer className="bg-brand-beige">
@@ -24,22 +80,34 @@ export default function Footer() {
           {/* Newsletter / Contact */}
           <div className="text-center">
             <p className="font-semibold text-brand-brown mb-3">Stay Updated</p>
-            <div className="flex gap-2">
+            <form onSubmit={handleSubmit} className="flex gap-2">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="px-4 py-2 border border-brand-brown/30 rounded-button text-sm focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={status === 'loading'}
+                className="px-4 py-2 border border-brand-brown/30 rounded-button text-sm focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink disabled:opacity-50 disabled:cursor-not-allowed"
               />
-              <button className="px-4 py-2 bg-brand-pink text-white rounded-button text-sm font-medium hover:bg-brand-pink/90 transition-colors">
-                Sign Up
+              <button
+                type="submit"
+                disabled={status === 'loading'}
+                className="px-4 py-2 bg-brand-pink text-white rounded-button text-sm font-medium hover:bg-brand-pink/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {status === 'loading' ? 'Signing Up...' : 'Sign Up'}
               </button>
-            </div>
-            <Link
-              href="/contact"
+            </form>
+            {message && (
+              <p className={`mt-2 text-sm ${status === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                {message}
+              </p>
+            )}
+            <a
+              href="mailto:pielcanelacoffee@gmail.com"
               className="inline-block mt-3 text-sm text-brand-brown hover:text-brand-pink transition-colors"
             >
               Questions? Contact Us
-            </Link>
+            </a>
           </div>
 
           {/* Social Links */}
