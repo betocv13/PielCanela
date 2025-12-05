@@ -90,28 +90,36 @@ export default function AboutSection() {
 
         {/* Desktop Grid - Hidden on mobile */}
         <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="relative aspect-[4/5] rounded-xl overflow-hidden group cursor-pointer"
-            >
-              <Image
-                src={item.image_url}
-                alt={item.title}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-transparent transition-colors duration-300 group-hover:bg-brand-pink/80" />
-              <div className="absolute bottom-0 left-0 p-3 text-left">
-                <h3 className="text-white text-md font-heading font-bold mb-2 drop-shadow-lg">
-                  {item.title}
-                </h3>
-                <p className="text-white text-sm drop-shadow-lg opacity-90">
-                  {item.description}
-                </p>
+          {items.map((item, index) => {
+            // Staggered vertical positioning
+            const marginTopClass = ['mt-0', 'mt-8', 'mt-4', 'mt-12'][index % 4]
+
+            return (
+              <div
+                key={item.id}
+                className={`relative aspect-[4/5] rounded-xl overflow-hidden group cursor-pointer transition-transform duration-300 group-hover:-translate-y-2 ${marginTopClass}`}
+              >
+                <Image
+                  src={item.image_url}
+                  alt={item.title}
+                  fill
+                  className="object-cover"
+                />
+                {/* Default pink gradient at bottom */}
+                <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-brand-pink/60 to-transparent" />
+                {/* Pink overlay on hover */}
+                <div className="absolute inset-0 bg-transparent transition-colors duration-300 group-hover:bg-brand-pink/80" />
+                <div className="absolute bottom-0 left-0 p-3 text-left">
+                  <h3 className="text-white text-md font-heading font-bold mb-2 drop-shadow-lg">
+                    {item.title}
+                  </h3>
+                  <p className="text-white text-sm drop-shadow-lg opacity-90">
+                    {item.description}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Mobile Swipeable Row */}
