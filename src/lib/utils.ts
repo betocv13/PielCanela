@@ -121,3 +121,79 @@ export function getNowInBusinessTZ(): Date {
   const timezone = getBusinessTimezone()
   return toZonedTime(new Date(), timezone)
 }
+
+// Generate .ics calendar file content for pickup
+export function generateCalendarFile(
+  orderNumber: string,
+  pickupDate: string,
+  pickupTime: string
+): string {
+  // Parse date and time (pickupDate is YYYY-MM-DD, pickupTime is HH:MM)
+  const [year, month, day] = pickupDate.split('-').map(Number)
+  const [hour, minute] = pickupTime.split(':').map(Number)
+
+  // Create start datetime
+  const startDate = new Date(year, month - 1, day, hour, minute)
+
+  // Create end datetime (15 minutes later)
+  const endDate = new Date(startDate.getTime() + 15 * 60 * 1000)
+
+  // Format dates for iCalendar (YYYYMMDDTHHMMSS)
+  const formatICalDate = (date: Date): string => {
+    const pad = (n: number) => n.toString().padStart(2, '0')
+    return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}T${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`
+  }
+
+  const dtStart = formatICalDate(startDate)
+  const dtEnd = formatICalDate(endDate)
+  const dtStamp = formatICalDate(new Date())
+
+  const location = '339 E Marion St, Des Moines, IA 50315'
+  const title = `Piel Canela Pickup - Order #${orderNumber}`
+  const description = `Order #${orderNumber}\\n\\nPickup Instructions:\\nPlease go to the garage door entrance. You're welcome to park in the garage or walk up—just send us a message on Instagram or Facebook when you arrive so we can bring your order out promptly.\\n\\nAddress: ${location}`
+
+  // Generate unique ID
+  const uid = `pielcanela-${orderNumber}-${Date.now()}@pielcanela.com`
+
+  // Build .ics file content (following RFC 5545)
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Piel Canela//Order Pickup//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTAMP:${dtStamp}`,
+    `DTSTART:${dtStart}`,
+    `DTEND:${dtEnd}`,
+    `SUMMARY:${title}`,
+    `DESCRIPTION:${description}`,
+    `LOCATION:${location}`,
+    'STATUS:CONFIRMED',
+    'SEQUENCE:0',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n')
+
+  return icsContent
+}
+
+// Download .ics calendar file
+export function downloadCalendarFile(
+  orderNumber: string,
+  pickupDate: string,
+  pickupTime: string
+): void {
+  const icsContent = generateCalendarFile(orderNumber, pickupDate, pickupTime)
+
+  // Create blob and download
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = `pielcanela-order-${orderNumber}.ics`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(link.href)
+}

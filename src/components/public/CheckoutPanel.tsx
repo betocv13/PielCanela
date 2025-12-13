@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle, ChevronLeft } from 'lucide-react'
+import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle, ChevronLeft, Calendar } from 'lucide-react'
 import { useCart } from '@/components/providers/CartProvider'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, downloadCalendarFile } from '@/lib/utils'
 import PaymentOptions from './PaymentOptions'
 
 interface AvailableSlot {
@@ -249,7 +249,7 @@ export default function CheckoutPanel() {
       <div className="fixed inset-0 z-50">
         <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
         <div className="absolute right-0 top-0 h-full w-full md:max-w-lg bg-white shadow-xl flex flex-col">
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center overflow-y-auto">
             <CheckCircle className="w-20 h-20 text-green-500 mb-6" />
             <h2 className="text-3xl font-heading text-brand-brown mb-3">Order Placed!</h2>
             <p className="text-lg text-gray-600 mb-2">
@@ -258,9 +258,37 @@ export default function CheckoutPanel() {
             <p className="text-2xl font-bold text-brand-brown mb-6">
               #{orderNumber}
             </p>
-            <p className="text-gray-500 mb-8 max-w-sm">
-              Please arrive at your selected pickup time. We&apos;ll have your order ready!
-            </p>
+
+            {/* Pickup Instructions Section */}
+            <div className="w-full max-w-md bg-brand-cream/60 rounded-lg p-5 mb-6 text-left">
+              <div className="flex items-start gap-2 mb-3">
+                <span className="text-xl mt-0.5">📍</span>
+                <h3 className="text-lg font-semibold text-brand-brown">Pickup Details</h3>
+              </div>
+              <p className="text-sm text-gray-700 mb-3">
+                <span className="font-medium text-brand-brown">
+                  Your pickup location is 339 E Marion St, Des Moines, IA 50315
+                </span>
+              </p>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Please go to the garage door entrance. You&apos;re welcome to park in the garage or walk up—just send us a message on Instagram or Facebook when you arrive so we can bring your order out promptly.
+              </p>
+              <p className="text-sm text-gray-700 mt-3 font-medium">
+                See you soon!
+              </p>
+            </div>
+
+            {/* Add to Calendar Button */}
+            <button
+              onClick={() => downloadCalendarFile(orderNumber, pickupDate, pickupTime)}
+              className="w-full max-w-xs bg-white border-2 border-brand-brown text-brand-brown py-3 px-6 rounded-button font-semibold
+                         hover:bg-brand-cream transition-colors mb-4 flex items-center justify-center gap-2"
+            >
+              <Calendar className="w-5 h-5" />
+              Add to Calendar
+            </button>
+
+            {/* Done Button */}
             <button
               onClick={handleClose}
               className="w-full max-w-xs bg-brand-brown text-white py-4 px-6 rounded-button font-semibold text-lg
