@@ -384,7 +384,7 @@ export default function CheckoutPanel() {
                   <div>
                     <p className="font-semibold text-brand-brown mb-1">Scheduled Pickup:</p>
                     <p className="text-brand-brown/80">
-                      {new Date(pickupDate).toLocaleDateString('en-US', {
+                      {new Date(pickupDate + 'T12:00:00').toLocaleDateString('en-US', {
                         weekday: 'long',
                         month: 'long',
                         day: 'numeric',
