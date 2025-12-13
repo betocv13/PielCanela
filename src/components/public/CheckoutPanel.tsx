@@ -33,7 +33,7 @@ const formatTime12Hour = (time: string): string => {
 const generateICSFile = (orderNumber: string, pickupDate: string, pickupTime: string) => {
   // Create start date/time in UTC format for ICS
   const startDate = new Date(`${pickupDate}T${pickupTime}:00`)
-  const endDate = new Date(startDate.getTime() + 15 * 60000) // Add 15 minutes
+  const endDate = new Date(startDate.getTime() + 1 * 60000) // Add 1 minute (calendar events need end time)
 
   // Format dates for ICS (YYYYMMDDTHHMMSS)
   const formatICSDate = (date: Date) => {
@@ -381,6 +381,18 @@ export default function CheckoutPanel() {
                 </div>
 
                 <div className="space-y-3 text-sm">
+                  <div>
+                    <p className="font-semibold text-brand-brown mb-1">Scheduled Pickup:</p>
+                    <p className="text-brand-brown/80">
+                      {new Date(pickupDate).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })} at {formatTime12Hour(pickupTime)}
+                    </p>
+                  </div>
+
                   <div>
                     <p className="font-semibold text-brand-brown mb-1">Location:</p>
                     <p className="text-brand-brown/80">339 E Marion St, Des Moines, IA 50315</p>
