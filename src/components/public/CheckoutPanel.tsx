@@ -31,10 +31,6 @@ const formatTime12Hour = (time: string): string => {
 
 // Generate .ics calendar file for download
 const generateICSFile = (orderNumber: string, pickupDate: string, pickupTime: string) => {
-  // Parse date and time
-  const [year, month, day] = pickupDate.split('-')
-  const [hours, minutes] = pickupTime.split(':')
-
   // Create start date/time in UTC format for ICS
   const startDate = new Date(`${pickupDate}T${pickupTime}:00`)
   const endDate = new Date(startDate.getTime() + 15 * 60000) // Add 15 minutes
