@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle, ChevronLeft, Banknote, Smartphone, ExternalLink } from 'lucide-react'
+import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle, ChevronLeft, Banknote, Smartphone, ExternalLink, Calendar, MapPin } from 'lucide-react'
 import { useCart } from '@/components/providers/CartProvider'
 import { formatPrice, generateVenmoLink, generateCashAppLink } from '@/lib/utils'
 
@@ -27,6 +27,70 @@ const formatTime12Hour = (time: string): string => {
   const ampm = hour >= 12 ? 'PM' : 'AM'
   hour = hour % 12 || 12
   return minute === '00' ? `${hour} ${ampm}` : `${hour}:${minute} ${ampm}`
+}
+
+// Generate .ics calendar file for download
+const generateICSFile = (orderNumber: string, pickupDate: string, pickupTime: string) => {
+  // Parse date and time
+  const [year, month, day] = pickupDate.split('-')
+  const [hours, minutes] = pickupTime.split(':')
+
+  // Create start date/time in UTC format for ICS
+  const startDate = new Date(`${pickupDate}T${pickupTime}:00`)
+  const endDate = new Date(startDate.getTime() + 15 * 60000) // Add 15 minutes
+
+  // Format dates for ICS (YYYYMMDDTHHMMSS)
+  const formatICSDate = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    const seconds = String(date.getSeconds()).padStart(2, '0')
+    return `${year}${month}${day}T${hours}${minutes}${seconds}`
+  }
+
+  const startDateICS = formatICSDate(startDate)
+  const endDateICS = formatICSDate(endDate)
+  const nowICS = formatICSDate(new Date())
+
+  const location = '339 E Marion St, Des Moines, IA 50315'
+  const description = `Order #${orderNumber}\\n\\nPickup Instructions:\\nPlease go to the garage door entrance. You're welcome to park in the garage or walk up—just send us a message on Instagram or Facebook when you arrive so we can bring your order out promptly.\\n\\nAddress: ${location}`
+
+  // Create ICS content
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Piel Canela Coffee//Order Pickup//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${orderNumber}-${nowICS}@pielcanela.coffee`,
+    `DTSTAMP:${nowICS}`,
+    `DTSTART:${startDateICS}`,
+    `DTEND:${endDateICS}`,
+    `SUMMARY:Piel Canela Pickup - Order #${orderNumber}`,
+    `LOCATION:${location}`,
+    `DESCRIPTION:${description}`,
+    'STATUS:CONFIRMED',
+    'BEGIN:VALARM',
+    'TRIGGER:-PT15M',
+    'ACTION:DISPLAY',
+    `DESCRIPTION:Reminder: Pickup Order #${orderNumber} at Piel Canela`,
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n')
+
+  // Create blob and download
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = `piel-canela-order-${orderNumber}.ics`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(link.href)
 }
 
 export default function CheckoutPanel() {
@@ -310,9 +374,42 @@ export default function CheckoutPanel() {
               <p className="text-2xl font-bold text-brand-brown mb-4">
                 #{orderNumber}
               </p>
-              <p className="text-gray-500 max-w-sm mx-auto">
-                Please arrive at your selected pickup time. We&apos;ll have your order ready!
-              </p>
+            </div>
+
+            {/* Pickup Instructions */}
+            <div className="max-w-md mx-auto mb-6">
+              <div className="bg-amber-50 rounded-xl p-5 border border-amber-200">
+                <div className="flex items-start gap-2 mb-3">
+                  <MapPin className="w-5 h-5 text-brand-brown flex-shrink-0 mt-0.5" />
+                  <h3 className="font-body font-bold text-brand-brown text-lg">Pickup Details</h3>
+                </div>
+
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <p className="font-semibold text-brand-brown mb-1">Location:</p>
+                    <p className="text-brand-brown/80">339 E Marion St, Des Moines, IA 50315</p>
+                  </div>
+
+                  <div>
+                    <p className="font-semibold text-brand-brown mb-1">Instructions:</p>
+                    <p className="text-brand-brown/80 leading-relaxed">
+                      Please go to the garage door entrance. You&apos;re welcome to park in the garage or walk up—just send us a message on Instagram or Facebook when you arrive so we can bring your order out promptly.
+                    </p>
+                  </div>
+
+                  <p className="text-brand-brown/90 italic pt-2">See you soon!</p>
+                </div>
+              </div>
+
+              {/* Add to Calendar Button */}
+              <button
+                onClick={() => generateICSFile(orderNumber, pickupDate, pickupTime)}
+                className="w-full mt-4 flex items-center justify-center gap-2 py-3 px-4 border-2 border-brand-brown/30
+                           text-brand-brown rounded-lg hover:bg-brand-cream hover:border-brand-brown transition-colors font-medium"
+              >
+                <Calendar className="w-5 h-5" />
+                Add to Calendar
+              </button>
             </div>
 
             {/* Payment Information */}
