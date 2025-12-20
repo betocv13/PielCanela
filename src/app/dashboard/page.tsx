@@ -376,13 +376,22 @@ export default function OrdersPage() {
                 <div className="space-y-2">
                   {order.items.map((item, index) => (
                     <div key={index} className="flex justify-between text-sm">
-                      <div>
+                      <div className="flex-1">
                         <p className="text-brand-brown">
                           • {item.quantity}x {item.productName} {item.size && `(${item.size})`}
                         </p>
-                        {(item.milk || item.addons.length > 0) && (
+                        {(item.temperature || item.milk || item.addons.length > 0) && (
                           <p className="text-brand-brown/60 text-xs ml-3">
-                            {[item.milk, ...item.addons].filter(Boolean).join(', ')}
+                            {[
+                              item.temperature && `${item.temperature.charAt(0).toUpperCase() + item.temperature.slice(1)}`,
+                              item.milk,
+                              ...item.addons
+                            ].filter(Boolean).join(', ')}
+                          </p>
+                        )}
+                        {item.specialInstructions && (
+                          <p className="text-brand-brown/60 text-xs ml-3 italic">
+                            Note: {item.specialInstructions}
                           </p>
                         )}
                       </div>
