@@ -128,41 +128,51 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ─── Hero nav two-state layout ─────────────────────────────────────────────
-   Width is always constrained to match the hero image container (px-3/px-6).
-   Only background-color and border-radius change between states.
+   Width always matches the hero image container (px-3 mobile / px-6 desktop).
+
+   Corner-fill technique (avoids z-index: -1 stacking context bug):
+   - Element background-color: white (no radius) fills the rectangular box
+     including the corner areas — this is the corner-fill layer
+   - ::before: brown with border-radius sits ON TOP of the white background,
+     clipping the brown to rounded corners and letting white show in the gaps
+   - Nav content uses `relative z-[1]` to paint above the ::before overlay
    ─────────────────────────────────────────────────────────────────────────── */
 .hero-nav {
-  left: 12px;   /* px-3 — matches hero section mobile horizontal padding */
+  left: 12px;
   right: 12px;
-  transition: transform 0.3s ease, background-color 0.3s ease, border-radius 0.3s ease;
+  transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
 @media (min-width: 768px) {
   .hero-nav {
-    left: 24px;  /* px-6 — matches hero section desktop horizontal padding */
+    left: 24px;
     right: 24px;
   }
 }
 
-.hero-nav-at-top {
-  background-color: transparent;
-  border-radius: 12px 12px 0 0;
-}
-
-.hero-nav-scrolled {
-  background-color: #3B1F0F;
-  border-radius: 10px 10px 0 0;
-}
-
-/* White rectangle sits behind the rounded brown nav, filling the corner gaps
-   so page content doesn't bleed through the transparent rounded corners. */
-.hero-nav-scrolled::before {
+/* Brown rounded overlay — always in the DOM, fades in/out via opacity */
+.hero-nav::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: white;
-  border-radius: 0;
-  z-index: -1;
+  background: #3B1F0F;
+  border-radius: 10px 10px 0 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.hero-nav-at-top {
+  background-color: transparent;
+}
+
+/* White fill (no radius) becomes the corner-fill behind the rounded ::before */
+.hero-nav-scrolled {
+  background-color: white;
+}
+
+.hero-nav-scrolled::before {
+  opacity: 1;
 }
 
 @layer utilities {

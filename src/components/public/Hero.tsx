@@ -79,7 +79,7 @@ export default function Hero() {
         style={{ transform }}
       >
         {/* Desktop — 3-column grid */}
-        <nav className="hidden md:grid grid-cols-3 items-center h-20 px-8 lg:px-12">
+        <nav className="relative z-[1] hidden md:grid grid-cols-3 items-center h-20 px-8 lg:px-12">
           <div className="flex items-center gap-7">
             <Link href="#menu" className={navLinkClass}>Shop</Link>
             <Link href="/about" className={navLinkClass}>About</Link>
@@ -105,7 +105,7 @@ export default function Hero() {
         </nav>
 
         {/* Mobile bar */}
-        <div className="md:hidden flex items-center justify-between h-16 px-5">
+        <div className="relative z-[1] md:hidden flex items-center justify-between h-16 px-5">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-1 text-white"
@@ -134,7 +134,7 @@ export default function Hero() {
 
         {/* Mobile dropdown */}
         {mobileMenuOpen && (
-          <div className="md:hidden flex flex-col gap-5 px-6 py-5 bg-[#3B1F0F] border-t border-white/10">
+          <div className="relative z-[1] md:hidden flex flex-col gap-5 px-6 py-5 bg-[#3B1F0F] border-t border-white/10">
             <Link href="#menu" className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>Shop</Link>
             <Link href="/about" className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>About</Link>
             <Link href="/socials" className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>Socials</Link>
