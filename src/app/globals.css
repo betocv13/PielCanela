@@ -32,6 +32,26 @@
   --brand-pink: #e47079;
   --brand-green: #74a12e;
   --brand-beige: #f0eade;
+
+  /* ── Content layout system ────────────────────────────────────────────────
+     These two variables define the shared horizontal inset and corner radius
+     used by the pink announcement bar, the hero image container, and the
+     scrolled brown navbar. Any future section (menu, footer, etc.) should
+     reference these so everything lines up on the same left/right grid.
+
+     Usage in CSS  → left: var(--content-inset); border-radius: var(--content-radius);
+     Usage in JSX  → className="content-inset" or "content-inset-margin"
+                     (utility classes defined below in @layer utilities)
+     Tailwind equiv → px-3 md:px-6 (padding) / mx-3 md:mx-6 (margin)
+     ─────────────────────────────────────────────────────────────────────── */
+  --content-inset: 12px;   /* mobile: 12px = Tailwind px-3 / mx-3 */
+  --content-radius: 12px;  /* shared corner radius for all three hero elements */
+}
+
+@media (min-width: 768px) {
+  :root {
+    --content-inset: 24px;  /* desktop: 24px = Tailwind px-6 / mx-6 */
+  }
 }
 
 /* Base styles */
@@ -139,17 +159,11 @@ h1, h2, h3, h4, h5, h6 {
      not a see-through hole showing page content.
    - ::before top: 12px keeps the brown overlay aligned with the padded content.
    ─────────────────────────────────────────────────────────────────────────── */
+/* var(--content-inset) handles both breakpoints — no @media needed here */
 .hero-nav {
-  left: 12px;
-  right: 12px;
+  left: var(--content-inset);
+  right: var(--content-inset);
   transition: transform 0.3s ease, background-color 0.3s ease, padding-top 0.3s ease;
-}
-
-@media (min-width: 768px) {
-  .hero-nav {
-    left: 24px;
-    right: 24px;
-  }
 }
 
 /* Brown rounded overlay — always in the DOM, fades in/out via opacity */
@@ -158,7 +172,7 @@ h1, h2, h3, h4, h5, h6 {
   position: absolute;
   inset: 0;
   background: #3B1F0F;
-  border-radius: 10px 10px 0 0;
+  border-radius: var(--content-radius) var(--content-radius) 0 0;
   opacity: 0;
   transition: opacity 0.3s ease, top 0.3s ease;
   pointer-events: none;
@@ -184,6 +198,18 @@ h1, h2, h3, h4, h5, h6 {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Horizontal padding that matches the hero image inset (--content-inset) */
+  .content-inset {
+    padding-left: var(--content-inset);
+    padding-right: var(--content-inset);
+  }
+
+  /* Horizontal margin that matches the hero image inset (--content-inset) */
+  .content-inset-margin {
+    margin-left: var(--content-inset);
+    margin-right: var(--content-inset);
   }
 
   /* Container with max-width */

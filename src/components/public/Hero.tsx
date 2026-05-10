@@ -144,8 +144,8 @@ export default function Hero() {
       </div>
 
       {/* Hero image section */}
-      <section className="bg-white px-3 md:px-6 pt-2 pb-6">
-        <div className="relative rounded-[20px] md:rounded-[24px] overflow-hidden h-[72vh] md:h-[78vh]">
+      <section className="bg-white content-inset pt-2 pb-6">
+        <div className="relative rounded-[12px] overflow-hidden h-[72vh] md:h-[78vh]">
           <Image
             src="/images/Mobile.png"
             alt="Piel Canela Coffee"

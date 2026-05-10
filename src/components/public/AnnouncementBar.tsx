@@ -20,7 +20,7 @@ export default function AnnouncementBar() {
 
   return (
     <div
-      className="mx-3 mt-3 rounded-[8px] h-10 flex items-center justify-center"
+      className="content-inset-margin mt-3 rounded-[12px] h-10 flex items-center justify-center"
       style={{ backgroundColor: '#FFE8E6' }}
     >
       {text && (
