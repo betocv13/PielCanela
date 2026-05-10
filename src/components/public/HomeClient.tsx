@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Product } from '@/types'
 import AnnouncementBar from './AnnouncementBar'
-import Header from './Header'
 import Hero from './Hero'
 import MenuSection from './MenuSection'
 import Footer from './Footer'
@@ -15,19 +14,8 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ products }: HomeClientProps) {
-  const [isScrolled, setIsScrolled] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
-
-  useEffect(() => {
-    // Wait until the hero nav overlay has scrolled out of view (~150px)
-    // before sliding the fixed header in
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 150)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   const handleOrderProduct = (product: Product) => {
     setSelectedProduct(product)
@@ -41,7 +29,6 @@ export default function HomeClient({ products }: HomeClientProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header visible={isScrolled} />
       <AnnouncementBar />
       <Hero />
       <div id="menu">
