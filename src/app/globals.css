@@ -140,7 +140,7 @@ h1, h2, h3, h4, h5, h6 {
 .hero-nav {
   left: 12px;
   right: 12px;
-  transition: transform 0.3s ease, background-color 0.3s ease;
+  transition: transform 0.3s ease, background-color 0.3s ease, top 0.3s ease;
 }
 
 @media (min-width: 768px) {
@@ -167,7 +167,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* White fill (no radius) becomes the corner-fill behind the rounded ::before */
+/* top: 12px lifts it off the browser edge for breathing room; overrides top-0 */
 .hero-nav-scrolled {
+  top: 12px;
   background-color: white;
 }
 
