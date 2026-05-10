@@ -196,6 +196,22 @@ h1, h2, h3, h4, h5, h6 {
   top: 12px; /* aligns brown overlay with the padded content */
 }
 
+/* ── Menu card: responsive width so exactly 3 fit on desktop, ~1.2 on mobile ── */
+.menu-card-wrapper {
+  position: relative;
+  flex-shrink: 0;
+  /* Mobile: 85% of content width → ~1.15 cards visible, hinting at next */
+  width: calc((100vw - 2 * var(--content-inset)) * 0.85);
+  aspect-ratio: 3 / 4;
+}
+
+@media (min-width: 768px) {
+  .menu-card-wrapper {
+    /* Desktop: exactly 3 cards + 2 gaps fill the full content width */
+    width: calc((100vw - 2 * var(--content-inset) - 32px) / 3);
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
