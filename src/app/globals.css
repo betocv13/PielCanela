@@ -154,6 +154,17 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 10px 10px 0 0;
 }
 
+/* White rectangle sits behind the rounded brown nav, filling the corner gaps
+   so page content doesn't bleed through the transparent rounded corners. */
+.hero-nav-scrolled::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: white;
+  border-radius: 0;
+  z-index: -1;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
