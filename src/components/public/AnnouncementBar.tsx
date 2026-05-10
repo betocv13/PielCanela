@@ -20,7 +20,7 @@ export default function AnnouncementBar() {
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 z-[60] h-9 flex items-center justify-center"
+      className="mx-3 mt-3 rounded-[8px] h-10 flex items-center justify-center"
       style={{ backgroundColor: '#FFE8E6' }}
     >
       {text && (

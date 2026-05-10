@@ -20,8 +20,10 @@ export default function HomeClient({ products }: HomeClientProps) {
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
 
   useEffect(() => {
+    // Wait until the hero nav overlay has scrolled out of view (~150px)
+    // before sliding the fixed header in
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100)
+      setIsScrolled(window.scrollY > 150)
     }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
@@ -39,8 +41,8 @@ export default function HomeClient({ products }: HomeClientProps) {
 
   return (
     <div className="min-h-screen bg-white">
+      <Header visible={isScrolled} />
       <AnnouncementBar />
-      <Header transparent={!isScrolled} />
       <Hero />
       <div id="menu">
         <MenuSection products={products} onOrderProduct={handleOrderProduct} />

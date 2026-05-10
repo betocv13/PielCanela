@@ -6,46 +6,35 @@ import { Menu, X, ShoppingCart } from 'lucide-react'
 import { useCart } from '@/components/providers/CartProvider'
 
 interface HeaderProps {
-  transparent?: boolean
+  visible?: boolean
 }
 
-export default function Header({ transparent = false }: HeaderProps) {
+export default function Header({ visible = false }: HeaderProps) {
   const { totalItems, setIsCartOpen } = useCart()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const linkClass = `font-nav text-[11px] font-bold tracking-[0.14em] uppercase transition-colors duration-200 ${
-    transparent
-      ? 'text-white hover:text-white/70'
-      : 'text-brand-brown hover:text-brand-pink'
-  }`
-
-  const logoClass = `font-heading text-2xl tracking-wider ${
-    transparent ? 'text-white' : 'text-brand-brown'
-  }`
+  const linkClass =
+    'font-nav text-[11px] font-bold tracking-[0.14em] uppercase text-brand-brown hover:text-brand-pink transition-colors duration-200'
 
   return (
     <header
-      className={`fixed top-9 left-0 right-0 z-50 transition-colors duration-300 ${
-        transparent ? 'bg-transparent' : 'bg-white/95 backdrop-blur-sm shadow-sm'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm
+        transition-transform duration-300 ${visible ? 'translate-y-0' : '-translate-y-full'}`}
     >
       {/* Desktop nav — 3 columns */}
-      <nav className="hidden md:grid grid-cols-3 items-center h-20 px-8 lg:px-12">
-        {/* Left: links */}
+      <nav className="hidden md:grid grid-cols-3 items-center h-16 px-8 lg:px-12">
         <div className="flex items-center gap-7">
           <Link href="#menu" className={linkClass}>Shop</Link>
           <Link href="/about" className={linkClass}>About</Link>
           <Link href="/socials" className={linkClass}>Socials</Link>
         </div>
 
-        {/* Center: wordmark */}
         <div className="flex justify-center">
-          <Link href="/" className={logoClass}>
+          <Link href="/" className="font-heading text-xl tracking-wider text-brand-brown">
             PIEL CANELA
           </Link>
         </div>
 
-        {/* Right: account + cart */}
         <div className="flex items-center gap-7 justify-end">
           <Link href="/login" className={linkClass}>Account</Link>
           <button
@@ -59,25 +48,22 @@ export default function Header({ transparent = false }: HeaderProps) {
       </nav>
 
       {/* Mobile nav */}
-      <div className="md:hidden flex items-center justify-between h-16 px-5">
-        {/* Hamburger */}
+      <div className="md:hidden flex items-center justify-between h-14 px-5">
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className={`p-1 transition-colors ${transparent ? 'text-white' : 'text-brand-brown'}`}
+          className="p-1 text-brand-brown"
           aria-label="Toggle menu"
         >
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
 
-        {/* Logo */}
-        <Link href="/" className={logoClass}>
+        <Link href="/" className="font-heading text-lg tracking-wider text-brand-brown">
           PIEL CANELA
         </Link>
 
-        {/* Cart icon */}
         <button
           onClick={() => setIsCartOpen(true)}
-          className={`p-1 relative transition-colors ${transparent ? 'text-white' : 'text-brand-brown'}`}
+          className="p-1 relative text-brand-brown"
           aria-label="Shopping cart"
         >
           <ShoppingCart className="w-5 h-5" />
@@ -91,13 +77,7 @@ export default function Header({ transparent = false }: HeaderProps) {
 
       {/* Mobile dropdown */}
       {mobileMenuOpen && (
-        <div
-          className={`md:hidden flex flex-col gap-5 px-6 py-5 border-t ${
-            transparent
-              ? 'bg-black/75 backdrop-blur-sm border-white/10'
-              : 'bg-white border-gray-100'
-          }`}
-        >
+        <div className="md:hidden flex flex-col gap-5 px-6 py-5 border-t border-gray-100 bg-white">
           <Link href="#menu" className={linkClass} onClick={() => setMobileMenuOpen(false)}>Shop</Link>
           <Link href="/about" className={linkClass} onClick={() => setMobileMenuOpen(false)}>About</Link>
           <Link href="/socials" className={linkClass} onClick={() => setMobileMenuOpen(false)}>Socials</Link>
