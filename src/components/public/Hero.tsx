@@ -75,13 +75,8 @@ export default function Hero() {
           scrolled → #3B1F0F bg, rounded top corners — drops in from viewport top
       */}
       <div
-        className="fixed top-0 left-0 right-0 z-50"
-        style={{
-          transform,
-          backgroundColor: atTop ? 'transparent' : '#3B1F0F',
-          borderRadius: atTop ? '0' : '10px 10px 0 0',
-          transition: 'transform 0.3s ease, background-color 0.3s ease, border-radius 0.3s ease',
-        }}
+        className={`fixed top-0 z-50 hero-nav ${atTop ? 'hero-nav-at-top' : 'hero-nav-scrolled'}`}
+        style={{ transform }}
       >
         {/* Desktop — 3-column grid */}
         <nav className="hidden md:grid grid-cols-3 items-center h-20 px-8 lg:px-12">
