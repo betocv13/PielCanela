@@ -9,47 +9,86 @@ interface ProductCardProps {
   onOrder: (product: Product) => void
 }
 
+function categoryBadge(category: string): string {
+  const c = category.toLowerCase().trim()
+  if (c === 'matcha') return '#6D7862'
+  if (c === 'sugar free' || c === 'sugar-free') return '#5170FF'
+  if (c === 'coffee') return '#805538'
+  return '#000000'
+}
+
 export default function ProductCard({ product, onOrder }: ProductCardProps) {
   return (
-    <div className="bg-white rounded-card shadow-card hover:shadow-card-hover transition-shadow duration-300 overflow-hidden flex flex-col">
-      {/* Product Image */}
-      <div className="relative aspect-square bg-brand-beige">
+    <button
+      onClick={() => onOrder(product)}
+      className="flex flex-col text-left cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown"
+      style={{
+        width: '290px',
+        height: '390px',
+        borderRadius: 'var(--content-radius)',
+        background: 'white',
+      }}
+    >
+      {/* ── Image area ── */}
+      <div className="relative flex-1 bg-[#F5F5F5]">
         {product.image_url ? (
           <Image
             src={product.image_url}
             alt={product.name}
             fill
             className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes="290px"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-4xl">☕</span>
+            <span className="text-5xl">☕</span>
           </div>
         )}
+
+        {/* Category badge */}
+        <span
+          className="absolute top-3 left-3 px-3 py-1 rounded-full text-white text-[10px] font-bold tracking-wide uppercase font-menu"
+          style={{ backgroundColor: categoryBadge(product.category) }}
+        >
+          {product.category}
+        </span>
       </div>
 
-      {/* Product Info */}
-      <div className="p-4 flex flex-col flex-grow">
-        <h3 className="font-semibold text-brand-brown text-lg mb-1">
-          {product.name}
-        </h3>
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2 flex-grow">
+      {/* ── Text area — fixed height so all cards align ── */}
+      <div
+        className="flex-shrink-0 px-4 pt-3 pb-3 bg-white"
+        style={{ height: '90px' }}
+      >
+        {/* Name + price on one row */}
+        <div className="flex items-baseline justify-between gap-3 mb-1.5">
+          <h3
+            className="text-[13px] font-bold font-menu truncate flex-1 leading-tight"
+            style={{ color: '#6D6D6D' }}
+          >
+            {product.name}
+          </h3>
+          <span
+            className="text-[13px] font-bold font-menu flex-shrink-0 leading-tight"
+            style={{ color: '#6D6D6D' }}
+          >
+            {formatPrice(product.base_price)}
+          </span>
+        </div>
+
+        {/* Description — 2-line clamp */}
+        <p
+          className="text-[11px] font-menu leading-snug"
+          style={{
+            color: '#6D6D6D',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
           {product.description}
         </p>
-        <p className="text-brand-brown font-bold mb-3">
-          {formatPrice(product.base_price)}
-        </p>
-
-        {/* Order Button */}
-        <button
-          onClick={() => onOrder(product)}
-          className="w-full bg-brand-brown text-white py-2.5 px-4 rounded-button font-semibold
-                     hover:bg-brand-brown/90 transition-colors duration-200 active:scale-[0.98]"
-        >
-          Order
-        </button>
       </div>
-    </div>
+    </button>
   )
 }

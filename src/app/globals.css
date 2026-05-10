@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sauce+One:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Open+Sauce+One:wght@700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -25,6 +25,7 @@
   --font-heading: 'TAN Songbird', Georgia, serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-nav: 'Open Sauce One', sans-serif;
+  --font-menu: 'Montserrat', sans-serif;
 
   /* Brand colors as CSS variables */
   --brand-brown: #805437;

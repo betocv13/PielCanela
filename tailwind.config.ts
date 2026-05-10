@@ -41,6 +41,7 @@ const config: Config = {
         heading: ['var(--font-heading)', 'serif'],
         body: ['var(--font-body)', 'sans-serif'],
         nav: ['var(--font-nav)', 'sans-serif'],
+        menu: ['var(--font-menu)', 'sans-serif'],
       },
       borderRadius: {
         'card': '12px',
