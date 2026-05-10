@@ -130,17 +130,19 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── Hero nav two-state layout ─────────────────────────────────────────────
    Width always matches the hero image container (px-3 mobile / px-6 desktop).
 
-   Corner-fill technique (avoids z-index: -1 stacking context bug):
-   - Element background-color: white (no radius) fills the rectangular box
-     including the corner areas — this is the corner-fill layer
-   - ::before: brown with border-radius sits ON TOP of the white background,
-     clipping the brown to rounded corners and letting white show in the gaps
-   - Nav content uses `relative z-[1]` to paint above the ::before overlay
+   Corner-fill + floating gap technique:
+   - Container always stays at top: 0 so translateY(-100%) hides the full
+     visual area (white gap + brown nav) as one unit — no clipping on exit.
+   - padding-top: 12px on the scrolled state pushes the brown overlay and nav
+     content 12px down inside the white rectangle, creating the breathing room.
+   - background-color: white fills from top: 0 so the 12px gap is solid white,
+     not a see-through hole showing page content.
+   - ::before top: 12px keeps the brown overlay aligned with the padded content.
    ─────────────────────────────────────────────────────────────────────────── */
 .hero-nav {
   left: 12px;
   right: 12px;
-  transition: transform 0.3s ease, background-color 0.3s ease, top 0.3s ease;
+  transition: transform 0.3s ease, background-color 0.3s ease, padding-top 0.3s ease;
 }
 
 @media (min-width: 768px) {
@@ -158,7 +160,7 @@ h1, h2, h3, h4, h5, h6 {
   background: #3B1F0F;
   border-radius: 10px 10px 0 0;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, top 0.3s ease;
   pointer-events: none;
 }
 
@@ -166,15 +168,17 @@ h1, h2, h3, h4, h5, h6 {
   background-color: transparent;
 }
 
-/* White fill (no radius) becomes the corner-fill behind the rounded ::before */
-/* top: 12px lifts it off the browser edge for breathing room; overrides top-0 */
+/* White fills from top: 0 (set by Tailwind fixed+top-0 in JSX).
+   padding-top: 12px pushes content and the ::before brown overlay down,
+   so the gap above the brown is solid white, not see-through. */
 .hero-nav-scrolled {
-  top: 12px;
+  padding-top: 12px;
   background-color: white;
 }
 
 .hero-nav-scrolled::before {
   opacity: 1;
+  top: 12px; /* aligns brown overlay with the padded content */
 }
 
 @layer utilities {
