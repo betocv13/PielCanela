@@ -38,10 +38,9 @@ const config: Config = {
         foreground: "var(--foreground)",
       },
       fontFamily: {
-        // Primary font for headings (TAN Songbird)
         heading: ['var(--font-heading)', 'serif'],
-        // Secondary font for body text
         body: ['var(--font-body)', 'sans-serif'],
+        nav: ['var(--font-nav)', 'sans-serif'],
       },
       borderRadius: {
         'card': '12px',

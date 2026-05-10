@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sauce+One:wght@700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,12 +18,13 @@
 
 :root {
   /* Background and foreground */
-  --background: #efeae3;
+  --background: #ffffff;
   --foreground: #333333;
 
   /* Font variables */
   --font-heading: 'TAN Songbird', Georgia, serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-nav: 'Open Sauce One', sans-serif;
 
   /* Brand colors as CSS variables */
   --brand-brown: #805437;

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Product } from '@/types'
+import AnnouncementBar from './AnnouncementBar'
 import Header from './Header'
 import Hero from './Hero'
 import MenuSection from './MenuSection'
@@ -18,12 +19,10 @@ export default function HomeClient({ products }: HomeClientProps) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
 
-  // Track scroll position for header transparency
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 100)
     }
-
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
@@ -39,20 +38,20 @@ export default function HomeClient({ products }: HomeClientProps) {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
+      <AnnouncementBar />
       <Header transparent={!isScrolled} />
       <Hero />
-      <MenuSection products={products} onOrderProduct={handleOrderProduct} />
+      <div id="menu">
+        <MenuSection products={products} onOrderProduct={handleOrderProduct} />
+      </div>
       <Footer />
 
-      {/* Order Modal */}
       <OrderModal
         product={selectedProduct}
         isOpen={isOrderModalOpen}
         onClose={handleCloseOrderModal}
       />
-
-      {/* Checkout Panel */}
       <CheckoutPanel />
     </div>
   )
