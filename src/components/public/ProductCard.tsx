@@ -60,7 +60,7 @@ export default function ProductCard({ product, onOrder }: ProductCardProps) {
       />
 
       {/* Text overlay — sits on top of the gradient */}
-      <div className="absolute bottom-0 left-0 right-0 px-4 pb-5 z-20">
+      <div className="absolute bottom-0 left-0 right-0 px-4 pb-5 z-20 text-left">
         {/* Name + price row */}
         <div className="flex items-baseline justify-between gap-2 mb-1">
           <h3
