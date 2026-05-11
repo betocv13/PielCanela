@@ -102,6 +102,7 @@ export default function SocialsSection() {
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
               scrollSnapType: 'x mandatory',
+              paddingRight: '1.5rem',
             }}
           >
             {IMAGES.map((src, i) => (
