@@ -87,7 +87,7 @@ export default function Hero() {
           </div>
 
           <div className="flex justify-center">
-            <Link href="/" className="font-heading text-2xl tracking-wider text-white">
+            <Link href="/" className="font-heading text-lg md:text-xl tracking-wider text-white whitespace-nowrap">
               PIEL CANELA
             </Link>
           </div>

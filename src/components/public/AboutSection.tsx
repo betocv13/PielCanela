@@ -15,7 +15,7 @@ export default function AboutSection() {
           <h2
             className="font-heading tracking-widest leading-tight mb-5"
             style={{
-              fontSize: 'clamp(2rem, 4vw, 3.5rem)',
+              fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
               color: 'white',
             }}
           >
@@ -54,7 +54,7 @@ export default function AboutSection() {
         {/* Desktop: plain <img>, anchored to bottom, extends 30px past card so overflow-hidden clips cup bases */}
         <div
           className="hidden md:block absolute left-0 right-0"
-          style={{ bottom: '-30px', height: '400px' }}
+          style={{ bottom: '-30px', height: '480px' }}
         >
           <img
             src={COFFEES_IMAGE}
