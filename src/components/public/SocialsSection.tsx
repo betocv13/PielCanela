@@ -93,8 +93,8 @@ export default function SocialsSection() {
           </a>
         </div>
 
-        {/* Carousel — outer clips overflow, inner scrolls */}
-        <div className="overflow-hidden" style={{ borderRadius: 'var(--content-radius)' }}>
+        {/* Carousel — negative right margin cancels parent padding so images reach the card edge */}
+        <div className="overflow-hidden" style={{ borderRadius: 'var(--content-radius)', marginRight: '-2rem' }}>
           <div
             ref={scrollRef}
             className="flex gap-4 overflow-x-auto"
