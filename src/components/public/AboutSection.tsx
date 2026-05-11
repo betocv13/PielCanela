@@ -13,11 +13,8 @@ export default function AboutSection() {
       >
         <div className="relative z-10 flex flex-col items-center text-center px-8 pt-14 pb-8 md:pt-20 md:pb-[340px]">
           <h2
-            className="font-heading tracking-widest leading-tight mb-5"
-            style={{
-              fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
-              color: 'white',
-            }}
+            className="font-heading text-2xl md:text-4xl tracking-widest leading-tight mb-5 whitespace-nowrap"
+            style={{ color: 'white' }}
           >
             PIEL CANELA
           </h2>
@@ -37,14 +34,15 @@ export default function AboutSection() {
           </a>
         </div>
 
-        {/* Mobile: plain <img> bypasses Next.js image optimization proxy, avoiding Supabase 402 */}
-        <div className="relative w-full md:hidden" style={{ height: '300px' }}>
+        {/* Mobile: 120% width centered so cup edges bleed past container sides (clipped by card overflow-hidden) */}
+        <div className="relative md:hidden" style={{ height: '300px', overflow: 'hidden' }}>
           <img
             src={COFFEES_IMAGE}
             alt="Piel Canela drinks"
             style={{
-              width: '100%',
+              width: '120%',
               height: '100%',
+              marginLeft: '-10%',
               objectFit: 'contain',
               objectPosition: 'center bottom',
             }}

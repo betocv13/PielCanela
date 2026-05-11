@@ -113,7 +113,7 @@ export default function Hero() {
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
-          <Link href="/" className="font-heading text-xl tracking-wider text-white">
+          <Link href="/" className="font-heading text-base tracking-wider text-white whitespace-nowrap">
             PIEL CANELA
           </Link>
 
