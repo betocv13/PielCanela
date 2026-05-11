@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { Menu, X, ShoppingCart } from 'lucide-react'
 import { useCart } from '@/components/providers/CartProvider'
@@ -146,21 +145,15 @@ export default function Hero() {
       {/* Hero image section */}
       <section className="bg-white content-inset pt-2 pb-6">
         <div className="relative rounded-[12px] overflow-hidden h-[85vh] md:h-[90vh]">
-          <Image
+          <img
             src="/images/MobileUpdate.webp"
             alt="Piel Canela Coffee"
-            fill
-            className="object-cover md:hidden"
-            priority
-            sizes="(max-width: 767px) 100vw, 0px"
+            className="object-cover md:hidden absolute inset-0 w-full h-full"
           />
-          <Image
+          <img
             src="/images/DesktopUpdate.webp"
             alt="Piel Canela Coffee"
-            fill
-            className="object-cover hidden md:block"
-            priority
-            sizes="(min-width: 768px) 100vw, 0px"
+            className="object-cover hidden md:block absolute inset-0 w-full h-full"
           />
 
           {/* Gradient scrim — inside overflow-hidden so it's clipped to image bounds */}
