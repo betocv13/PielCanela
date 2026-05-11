@@ -34,18 +34,18 @@ export default function AboutSection() {
           </a>
         </div>
 
-        {/* Mobile: 170% wide, centered via margin+translate so center cup is prominent and sides bleed off */}
-        <div className="relative md:hidden" style={{ height: '360px', overflow: 'hidden' }}>
+        {/* Mobile: absolutely positioned, 260% wide so cups are large and sides bleed off; card overflow-hidden clips */}
+        <div className="relative md:hidden" style={{ height: '380px' }}>
           <img
             src={COFFEES_IMAGE}
             alt="Piel Canela drinks"
             style={{
-              width: '170%',
-              height: '100%',
-              marginLeft: '50%',
+              position: 'absolute',
+              width: '260%',
+              height: 'auto',
+              left: '50%',
+              bottom: 0,
               transform: 'translateX(-50%)',
-              objectFit: 'contain',
-              objectPosition: 'center bottom',
             }}
           />
         </div>
