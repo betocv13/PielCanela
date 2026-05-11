@@ -34,15 +34,16 @@ export default function AboutSection() {
           </a>
         </div>
 
-        {/* Mobile: 120% width centered so cup edges bleed past container sides (clipped by card overflow-hidden) */}
+        {/* Mobile: 170% wide, centered via margin+translate so center cup is prominent and sides bleed off */}
         <div className="relative md:hidden" style={{ height: '300px', overflow: 'hidden' }}>
           <img
             src={COFFEES_IMAGE}
             alt="Piel Canela drinks"
             style={{
-              width: '120%',
+              width: '170%',
               height: '100%',
-              marginLeft: '-10%',
+              marginLeft: '50%',
+              transform: 'translateX(-50%)',
               objectFit: 'contain',
               objectPosition: 'center bottom',
             }}
