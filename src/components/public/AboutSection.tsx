@@ -13,11 +13,9 @@ export default function AboutSection() {
       >
         <div className="relative z-10 flex flex-col items-center text-center px-8 pt-14 pb-8 md:pt-20 md:pb-[340px]">
           <h2
-            className="tracking-widest leading-tight mb-5"
+            className="font-heading tracking-widest leading-tight mb-5"
             style={{
               fontSize: 'clamp(2rem, 4vw, 3.5rem)',
-              fontFamily: "'TAN Songbird', Georgia, serif",
-              fontWeight: 700,
               color: 'white',
             }}
           >
@@ -56,7 +54,7 @@ export default function AboutSection() {
         {/* Desktop: plain <img>, anchored to bottom, extends 30px past card so overflow-hidden clips cup bases */}
         <div
           className="hidden md:block absolute left-0 right-0"
-          style={{ bottom: '-30px', height: '320px' }}
+          style={{ bottom: '-30px', height: '400px' }}
         >
           <img
             src={COFFEES_IMAGE}
