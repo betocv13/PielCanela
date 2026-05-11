@@ -40,7 +40,7 @@ export default function AboutSection() {
           src={COFFEES_IMAGE}
           alt="Piel Canela drinks"
           style={{
-            width: '155%',
+            width: '300%',
             height: 'auto',
             left: '50%',
             bottom: 0,
