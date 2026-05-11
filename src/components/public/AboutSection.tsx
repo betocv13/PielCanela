@@ -35,7 +35,7 @@ export default function AboutSection() {
         </div>
 
         {/* Mobile: 170% wide, centered via margin+translate so center cup is prominent and sides bleed off */}
-        <div className="relative md:hidden" style={{ height: '300px', overflow: 'hidden' }}>
+        <div className="relative md:hidden" style={{ height: '360px', overflow: 'hidden' }}>
           <img
             src={COFFEES_IMAGE}
             alt="Piel Canela drinks"
