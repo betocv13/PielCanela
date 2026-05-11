@@ -35,13 +35,13 @@ export default function AboutSection() {
         </div>
 
         {/* Mobile: absolutely positioned, 260% wide so cups are large and sides bleed off; card overflow-hidden clips */}
-        <div className="relative md:hidden" style={{ height: '380px' }}>
+        <div className="relative md:hidden" style={{ height: '460px' }}>
           <img
             src={COFFEES_IMAGE}
             alt="Piel Canela drinks"
             style={{
               position: 'absolute',
-              width: '260%',
+              width: '420%',
               height: 'auto',
               left: '50%',
               bottom: 0,
