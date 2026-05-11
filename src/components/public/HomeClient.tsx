@@ -5,6 +5,7 @@ import { Product } from '@/types'
 import AnnouncementBar from './AnnouncementBar'
 import Hero from './Hero'
 import MenuSection from './MenuSection'
+import AboutSection from './AboutSection'
 import Footer from './Footer'
 import OrderModal from './OrderModal'
 import CheckoutPanel from './CheckoutPanel'
@@ -34,6 +35,7 @@ export default function HomeClient({ products }: HomeClientProps) {
       <div id="menu">
         <MenuSection products={products} onOrderProduct={handleOrderProduct} />
       </div>
+      <AboutSection />
       <Footer />
 
       <OrderModal
