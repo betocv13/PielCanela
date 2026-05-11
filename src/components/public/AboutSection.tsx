@@ -24,8 +24,16 @@ export default function AboutSection() {
         */}
         <div className="relative z-10 flex flex-col items-center text-center px-8 pt-14 pb-8 md:pt-20 md:pb-[340px]">
           <h2
-            className="font-heading text-white tracking-widest leading-tight mb-5"
-            style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}
+            className="tracking-widest leading-tight mb-5"
+            style={{
+              fontSize: 'clamp(2rem, 4vw, 3.5rem)',
+              // Inline style guarantees TAN Songbird wins over any cascade from
+              // globals.css h2 base rule (unlayered CSS beats @layer utilities).
+              // Falls back to Georgia if /public/fonts/TAN-Songbird.woff2 is missing.
+              fontFamily: "'TAN Songbird', Georgia, serif",
+              fontWeight: 700,
+              color: 'white',
+            }}
           >
             PIEL CANELA
           </h2>
