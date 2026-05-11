@@ -6,6 +6,7 @@ import AnnouncementBar from './AnnouncementBar'
 import Hero from './Hero'
 import MenuSection from './MenuSection'
 import AboutSection from './AboutSection'
+import SocialsSection from './SocialsSection'
 import Footer from './Footer'
 import OrderModal from './OrderModal'
 import CheckoutPanel from './CheckoutPanel'
@@ -36,6 +37,7 @@ export default function HomeClient({ products }: HomeClientProps) {
         <MenuSection products={products} onOrderProduct={handleOrderProduct} />
       </div>
       <AboutSection />
+      <SocialsSection />
       <Footer />
 
       <OrderModal
