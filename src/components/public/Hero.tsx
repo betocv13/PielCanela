@@ -145,7 +145,7 @@ export default function Hero() {
 
       {/* Hero image section */}
       <section className="bg-white content-inset pt-2 pb-6">
-        <div className="relative rounded-[12px] overflow-hidden h-[75vh] md:h-[90vh]">
+        <div className="relative rounded-[12px] overflow-hidden h-[85vh] md:h-[90vh]">
           <Image
             src="/images/Mobile.png"
             alt="Piel Canela Coffee"
@@ -171,8 +171,8 @@ export default function Hero() {
             <p className="text-white text-[10px] md:text-[11px] font-bold tracking-[0.22em] uppercase mb-2 drop-shadow">
               Bienvenidos
             </p>
-            <h1 className="text-white text-3xl md:text-5xl font-menu font-bold leading-tight mb-4 drop-shadow-lg">
-              Un Toque Mexicano
+            <h1 className="text-white text-2xl md:text-4xl font-menu font-bold leading-tight mb-4 drop-shadow-lg">
+              Café con Cultura
             </h1>
             <a
               href="#menu"
