@@ -128,7 +128,6 @@ export default function SocialsSection() {
                 key={i}
                 className="socials-card"
                 style={{
-                  borderRadius: 'var(--content-radius)',
                   overflow: 'hidden',
                   scrollSnapAlign: 'start',
                 }}

@@ -213,6 +213,7 @@ h1, h2, h3, h4, h5, h6 {
 .socials-card {
   flex-shrink: 0;
   aspect-ratio: 1 / 1;
+  border-radius: var(--content-radius);
   /* Mobile: 83% of inner container → ~1.2 cards visible */
   width: calc((100vw - 2 * var(--content-inset) - 64px) * 0.83);
 }
