@@ -147,7 +147,7 @@ export default function Hero() {
       <section className="bg-white content-inset pt-2 pb-6">
         <div className="relative rounded-[12px] overflow-hidden h-[85vh] md:h-[90vh]">
           <Image
-            src="/images/Mobile.png"
+            src="/images/MobileUpdate.webp"
             alt="Piel Canela Coffee"
             fill
             className="object-cover md:hidden"
@@ -155,7 +155,7 @@ export default function Hero() {
             sizes="(max-width: 767px) 100vw, 0px"
           />
           <Image
-            src="/images/BannerPink.png"
+            src="/images/DesktopUpdate.webp"
             alt="Piel Canela Coffee"
             fill
             className="object-cover hidden md:block"
