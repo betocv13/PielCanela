@@ -11,7 +11,7 @@ export default function Footer() {
         className="content-inset-margin"
         style={{
           backgroundColor: '#FFE8E6',
-          borderRadius: '0 0 var(--content-radius) var(--content-radius)',
+          borderRadius: '0 0 32px 32px',
         }}
       >
       {/* Main Footer */}
