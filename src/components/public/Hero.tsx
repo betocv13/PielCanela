@@ -145,7 +145,7 @@ export default function Hero() {
 
       {/* Hero image section */}
       <section className="bg-white content-inset pt-2 pb-6">
-        <div className="relative rounded-[12px] overflow-hidden h-[72vh] md:h-[78vh]">
+        <div className="relative rounded-[12px] overflow-hidden h-[75vh] md:h-[90vh]">
           <Image
             src="/images/Mobile.png"
             alt="Piel Canela Coffee"
@@ -171,12 +171,12 @@ export default function Hero() {
             <p className="text-white text-[10px] md:text-[11px] font-bold tracking-[0.22em] uppercase mb-2 drop-shadow">
               Bienvenidos
             </p>
-            <h1 className="text-white text-3xl md:text-5xl font-heading leading-tight mb-4 drop-shadow-lg">
+            <h1 className="text-white text-3xl md:text-5xl font-menu font-bold leading-tight mb-4 drop-shadow-lg">
               Un Toque Mexicano
             </h1>
             <a
               href="#menu"
-              className="inline-block border border-white text-white font-nav text-[11px] font-bold tracking-[0.14em] uppercase px-7 py-3 rounded-full hover:bg-white hover:text-brand-brown transition-colors duration-200"
+              className="inline-block border border-white text-white font-nav text-[11px] font-bold tracking-[0.14em] uppercase px-6 py-2 rounded-full hover:bg-white hover:text-brand-brown transition-colors duration-200"
             >
               Order Now
             </a>
