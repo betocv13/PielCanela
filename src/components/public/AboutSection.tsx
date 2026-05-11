@@ -5,13 +5,13 @@ export default function AboutSection() {
   return (
     <section className="bg-white py-6">
       <div
-        className="content-inset-margin relative overflow-hidden"
+        className="content-inset-margin relative overflow-hidden min-h-[640px] md:min-h-0"
         style={{
           background: 'linear-gradient(180deg, #2B1914 0%, #805438 100%)',
           borderRadius: 'var(--content-radius)',
         }}
       >
-        <div className="relative z-10 flex flex-col items-center text-center px-8 pt-14 pb-8 md:pt-20 md:pb-[340px]">
+        <div className="relative z-10 flex flex-col items-center text-center px-8 pt-14 pb-[300px] md:pt-20 md:pb-[340px]">
           <h2
             className="font-heading text-2xl md:text-4xl tracking-widest leading-tight mb-5 whitespace-nowrap"
             style={{ color: 'white' }}
@@ -34,21 +34,19 @@ export default function AboutSection() {
           </a>
         </div>
 
-        {/* Mobile: absolutely positioned, 260% wide so cups are large and sides bleed off; card overflow-hidden clips */}
-        <div className="relative md:hidden" style={{ height: '460px' }}>
-          <img
-            src={COFFEES_IMAGE}
-            alt="Piel Canela drinks"
-            style={{
-              position: 'absolute',
-              width: '420%',
-              height: 'auto',
-              left: '50%',
-              bottom: 0,
-              transform: 'translateX(-50%)',
-            }}
-          />
-        </div>
+        {/* Mobile: absolute, anchored to bottom, wider than card so sides bleed and overflow-hidden clips */}
+        <img
+          className="md:hidden absolute"
+          src={COFFEES_IMAGE}
+          alt="Piel Canela drinks"
+          style={{
+            width: '155%',
+            height: 'auto',
+            left: '50%',
+            bottom: 0,
+            transform: 'translateX(-50%)',
+          }}
+        />
 
         {/* Desktop: plain <img>, anchored to bottom, extends 30px past card so overflow-hidden clips cup bases */}
         <div
