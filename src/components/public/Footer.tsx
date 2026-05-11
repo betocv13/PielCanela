@@ -6,9 +6,16 @@ export default function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="bg-brand-beige">
+    <footer className="bg-white pb-6">
+      <div
+        className="content-inset-margin"
+        style={{
+          backgroundColor: '#FFE8E6',
+          borderRadius: '0 0 var(--content-radius) var(--content-radius)',
+        }}
+      >
       {/* Main Footer */}
-      <div className="container-custom py-8">
+      <div className="px-6 md:px-10 py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Logo */}
           <div className="flex items-center">
@@ -67,12 +74,11 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-brand-brown/20">
-        <div className="container-custom py-4">
-          <p className="text-center text-sm text-brand-brown/70">
-            &copy; {currentYear} Piel Canela Coffee. All rights reserved.
-          </p>
-        </div>
+      <div className="border-t border-brand-brown/20 px-6 md:px-10 py-4">
+        <p className="text-center text-sm text-brand-brown/70">
+          &copy; {currentYear} Piel Canela Coffee. All rights reserved.
+        </p>
+      </div>
       </div>
     </footer>
   )
