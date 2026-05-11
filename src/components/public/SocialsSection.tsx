@@ -16,11 +16,15 @@ const IMAGES = [
 const pillClass =
   'border border-[#3B1F0F] text-[#3B1F0F] font-menu font-bold text-[11px] tracking-[0.14em] uppercase px-6 py-2.5 rounded-full hover:bg-[#3B1F0F] hover:text-white transition-colors duration-200'
 
+const STAGGER_DELAYS = ['0s', '0.1s', '0.2s', '0.3s', '0.4s']
+
 export default function SocialsSection() {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const sectionRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [visible, setVisible] = useState(false)
 
   const update = useCallback(() => {
     const el = scrollRef.current
@@ -44,6 +48,18 @@ export default function SocialsSection() {
     }
   }, [update])
 
+  // IntersectionObserver: trigger zoom-out animation when section enters viewport
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setVisible(true) },
+      { threshold: 0.2 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   const scrollByCard = (dir: 1 | -1) => {
     const el = scrollRef.current
     if (!el) return
@@ -53,7 +69,7 @@ export default function SocialsSection() {
   }
 
   return (
-    <section className="bg-white py-6">
+    <section ref={sectionRef} className="bg-white py-6">
       <div
         className="content-inset-margin"
         style={{
@@ -101,7 +117,15 @@ export default function SocialsSection() {
                 <img
                   src={src}
                   alt={`Piel Canela community photo ${i + 1}`}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                    transform: visible ? 'scale(1)' : 'scale(1.08)',
+                    transition: 'transform 0.7s ease-out',
+                    transitionDelay: STAGGER_DELAYS[i] ?? '0s',
+                  }}
                 />
               </div>
             ))}
