@@ -5,7 +5,7 @@ export default function AboutSection() {
   return (
     <section className="bg-white py-6">
       <div
-        className="content-inset-margin relative overflow-hidden min-h-[640px] md:min-h-0"
+        className="content-inset-margin relative overflow-hidden min-h-[520px] md:min-h-0"
         style={{
           background: 'linear-gradient(180deg, #2B1914 0%, #805438 100%)',
           borderRadius: 'var(--content-radius)',
@@ -40,7 +40,7 @@ export default function AboutSection() {
           src={COFFEES_IMAGE}
           alt="Piel Canela drinks"
           style={{
-            width: '300%',
+            width: '100%',
             height: 'auto',
             left: '50%',
             bottom: 0,
