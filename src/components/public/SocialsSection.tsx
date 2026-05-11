@@ -33,6 +33,24 @@ export default function SocialsSection() {
     setCanScrollLeft(el.scrollLeft > 1)
     setCanScrollRight(el.scrollLeft < max - 1)
     setProgress(max > 0 ? el.scrollLeft / max : 0)
+
+    // Adjust each card's border-radius so only fully-inside corners are rounded
+    const containerRect = el.getBoundingClientRect()
+    const r = 'var(--content-radius)'
+    el.querySelectorAll<HTMLElement>('.socials-card').forEach((card) => {
+      const cardRect = card.getBoundingClientRect()
+      const clippedLeft = cardRect.left < containerRect.left - 1
+      const clippedRight = cardRect.right > containerRect.right + 1
+      if (clippedLeft && clippedRight) {
+        card.style.borderRadius = '0'
+      } else if (clippedLeft) {
+        card.style.borderRadius = `0 ${r} ${r} 0`
+      } else if (clippedRight) {
+        card.style.borderRadius = `${r} 0 0 ${r}`
+      } else {
+        card.style.borderRadius = r
+      }
+    })
   }, [])
 
   useEffect(() => {
