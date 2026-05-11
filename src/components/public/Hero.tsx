@@ -81,8 +81,8 @@ export default function Hero() {
         <nav className="relative z-[1] hidden md:grid grid-cols-3 items-center h-20 px-8 lg:px-12">
           <div className="flex items-center gap-7">
             <Link href="#menu" className={navLinkClass}>Shop</Link>
-            <Link href="#" className={navLinkClass}>About</Link>
-            <Link href="#" className={navLinkClass}>Socials</Link>
+            <Link href="#about" className={navLinkClass}>About</Link>
+            <Link href="#socials" className={navLinkClass}>Socials</Link>
           </div>
 
           <div className="flex justify-center">
@@ -135,8 +135,8 @@ export default function Hero() {
         {mobileMenuOpen && (
           <div className="relative z-[1] md:hidden flex flex-col gap-5 px-6 py-5 bg-[#3B1F0F] border-t border-white/10">
             <Link href="#menu" className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>Shop</Link>
-            <Link href="#" className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>About</Link>
-            <Link href="#" className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>Socials</Link>
+            <Link href="#about" className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>About</Link>
+            <Link href="#socials" className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>Socials</Link>
             <Link href="/login" className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>Account</Link>
           </div>
         )}

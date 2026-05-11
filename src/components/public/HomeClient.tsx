@@ -36,8 +36,8 @@ export default function HomeClient({ products }: HomeClientProps) {
       <div id="menu">
         <MenuSection products={products} onOrderProduct={handleOrderProduct} />
       </div>
-      <AboutSection />
-      <SocialsSection />
+      <div id="about"><AboutSection /></div>
+      <div id="socials"><SocialsSection /></div>
       <Footer />
 
       <OrderModal
