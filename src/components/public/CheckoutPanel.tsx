@@ -341,7 +341,7 @@ export default function CheckoutPanel() {
                     <div key={index} className="bg-gray-50 rounded-lg p-3">
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex-1">
-                          <h4 className="font-medium text-brand-brown">
+                          <h4 className="font-menu font-bold text-brand-brown">
                             {item.productName}
                           </h4>
                           <div className="text-xs text-gray-500 space-y-0.5">
@@ -381,7 +381,7 @@ export default function CheckoutPanel() {
                             <Plus className="w-3 h-3" />
                           </button>
                         </div>
-                        <span className="font-medium text-brand-brown">
+                        <span className="font-menu font-bold text-brand-brown">
                           {formatPrice(item.itemTotal)}
                         </span>
                       </div>
@@ -402,7 +402,7 @@ export default function CheckoutPanel() {
                 <div className="space-y-6">
                   {/* Pickup Time */}
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                    <h3 className="text-sm font-menu font-bold text-gray-500 uppercase tracking-wide mb-3">
                       Pickup Time
                     </h3>
 
@@ -454,12 +454,12 @@ export default function CheckoutPanel() {
 
                   {/* Contact Info */}
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                    <h3 className="text-sm font-menu font-bold text-gray-500 uppercase tracking-wide mb-3">
                       Contact Info
                     </h3>
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-sm font-medium text-brand-brown mb-1">
+                        <label className="block text-sm font-menu font-bold text-brand-brown mb-1">
                           Name *
                         </label>
                         <input
@@ -472,7 +472,7 @@ export default function CheckoutPanel() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-brand-brown mb-1">
+                        <label className="block text-sm font-menu font-bold text-brand-brown mb-1">
                           Phone *
                         </label>
                         <input
@@ -485,7 +485,7 @@ export default function CheckoutPanel() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-brand-brown mb-1">
+                        <label className="block text-sm font-menu font-bold text-brand-brown mb-1">
                           Email (optional)
                         </label>
                         <input
@@ -501,7 +501,7 @@ export default function CheckoutPanel() {
 
                   {/* Special Notes */}
                   <div>
-                    <label className="block text-sm font-medium text-brand-brown mb-1">
+                    <label className="block text-sm font-menu font-bold text-brand-brown mb-1">
                       Special Notes (optional)
                     </label>
                     <textarea

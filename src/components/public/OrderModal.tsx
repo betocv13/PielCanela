@@ -221,7 +221,7 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
           {/* Size selection */}
           {product.sizes && product.sizes.length > 0 && (
             <div className="mb-4">
-              <h3 className="font-medium text-brand-brown mb-2">Size</h3>
+              <h3 className="font-menu font-bold text-brand-brown mb-2">Size</h3>
               <div className="grid grid-cols-3 gap-2">
                 {product.sizes.map((size) => {
                   // Support both old and new price format
@@ -252,7 +252,7 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
             const availableMilkOptions = getAvailableMilkOptions()
             return availableMilkOptions.length > 0 && (
               <div className="mb-4">
-                <h3 className="font-medium text-brand-brown mb-2">Milk</h3>
+                <h3 className="font-menu font-bold text-brand-brown mb-2">Milk</h3>
                 <div className="space-y-2">
                   {availableMilkOptions.map((milk) => (
                     <button
@@ -282,7 +282,7 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
             const availableAddonOptions = getAvailableAddonOptions()
             return availableAddonOptions.length > 0 && (
               <div className="mb-4">
-                <h3 className="font-medium text-brand-brown mb-2">Add-ons</h3>
+                <h3 className="font-menu font-bold text-brand-brown mb-2">Add-ons</h3>
                 <div className="space-y-2">
                   {availableAddonOptions.map((addon) => (
                     <button
@@ -307,7 +307,7 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
 
           {/* Special instructions */}
           <div className="mb-4">
-            <h3 className="font-medium text-brand-brown mb-2">Special Instructions</h3>
+            <h3 className="font-menu font-bold text-brand-brown mb-2">Special Instructions</h3>
             <textarea
               value={specialInstructions}
               onChange={(e) => setSpecialInstructions(e.target.value)}
@@ -319,7 +319,7 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
 
           {/* Quantity */}
           <div className="mb-6">
-            <h3 className="font-medium text-brand-brown mb-2">Quantity</h3>
+            <h3 className="font-menu font-bold text-brand-brown mb-2">Quantity</h3>
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setQuantity(q => Math.max(1, q - 1))}
