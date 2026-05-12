@@ -211,7 +211,7 @@ export default function OrderModal({ product, isOpen, onClose }: OrderModalProps
 
         {/* Content */}
         <div className="p-6">
-          <h2 className="text-2xl font-heading text-brand-brown mb-2">
+          <h2 className="text-2xl font-menu font-bold text-brand-brown mb-2">
             {product.name}
           </h2>
           {product.description && (
