@@ -86,7 +86,7 @@ export default function PaymentOptions({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-heading text-brand-brown">Payment Method</h3>
+      <h3 className="text-lg font-menu font-bold text-brand-brown">Payment Method</h3>
 
       {/* Payment method selection */}
       <div className="grid gap-3">
@@ -109,7 +109,7 @@ export default function PaymentOptions({
                 <Icon className="w-6 h-6" />
               </div>
               <div className="flex-1">
-                <p className="font-medium text-brand-brown">{method.name}</p>
+                <p className="font-menu font-bold text-brand-brown">{method.name}</p>
                 <p className="text-sm text-brand-brown/60">{method.description}</p>
               </div>
               <div
@@ -133,7 +133,7 @@ export default function PaymentOptions({
       {/* Payment details for selected method */}
       {selectedMethod === 'venmo' && settings && (
         <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
-          <h4 className="font-medium text-blue-800 mb-3">Venmo Payment</h4>
+          <h4 className="font-menu font-bold text-blue-800 mb-3">Venmo Payment</h4>
 
           {settings.venmo_qr_url && (
             <div className="flex justify-center mb-4">
@@ -183,7 +183,7 @@ export default function PaymentOptions({
 
       {selectedMethod === 'cashapp' && settings && (
         <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-100">
-          <h4 className="font-medium text-green-800 mb-3">Cash App Payment</h4>
+          <h4 className="font-menu font-bold text-green-800 mb-3">Cash App Payment</h4>
 
           {settings.cashapp_qr_url && (
             <div className="flex justify-center mb-4">
@@ -218,7 +218,7 @@ export default function PaymentOptions({
 
       {selectedMethod === 'cash' && (
         <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h4 className="font-medium text-gray-800 mb-2">Cash Payment</h4>
+          <h4 className="font-menu font-bold text-gray-800 mb-2">Cash Payment</h4>
           <p className="text-sm text-gray-600">
             Please bring exact change if possible. Payment is due at pickup.
           </p>
