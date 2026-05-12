@@ -10,7 +10,7 @@ export default function AnnouncementBar() {
       .then(r => r.json())
       .then(({ settings }) => {
         if (settings?.ordering_enabled) {
-          setText('WELCOME')
+          setText('WELCOME TO OUR STORE')
         } else {
           setText(settings?.ordering_closed_message || 'CLOSED FOR PICKUP')
         }
