@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import { Product } from '@/types'
 import { formatPrice } from '@/lib/utils'
@@ -18,6 +19,8 @@ function categoryBadge(category: string): string {
 }
 
 export default function ProductCard({ product, onOrder }: ProductCardProps) {
+  const [imgError, setImgError] = useState(false)
+
   return (
     // Fills the .menu-card-wrapper container (position: relative, aspect-ratio)
     <button
@@ -28,13 +31,22 @@ export default function ProductCard({ product, onOrder }: ProductCardProps) {
       {/* Full-bleed product image */}
       <div className="absolute inset-0 bg-[#F5F5F5]">
         {product.image_url ? (
-          <Image
-            src={product.image_url}
-            alt={product.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 767px) 85vw, 33vw"
-          />
+          imgError ? (
+            <img
+              src={product.image_url}
+              alt={product.name}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          ) : (
+            <Image
+              src={product.image_url}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 767px) 85vw, 33vw"
+              onError={() => setImgError(true)}
+            />
+          )
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="text-5xl">☕</span>
