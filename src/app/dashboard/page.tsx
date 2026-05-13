@@ -169,6 +169,8 @@ export default function OrdersPage() {
         return 'Cash App'
       case 'cash':
         return 'Cash on Pickup'
+      case 'stripe':
+        return 'Card (Stripe)'
       default:
         return method
     }
@@ -389,21 +391,27 @@ export default function OrdersPage() {
               <div className="px-4 py-3 border-b border-gray-100">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-brand-brown">PAYMENT:</span>
-                  <button
-                    onClick={() => updatePaymentStatus(order.id, !order.payment_confirmed)}
-                    className="flex items-center gap-2"
-                  >
-                    <span className={`text-sm ${order.payment_confirmed ? 'text-green-600' : 'text-gray-500'}`}>
-                      {order.payment_confirmed ? 'Paid' : 'Not Paid'}
+                  {order.payment_method === 'stripe' ? (
+                    <span className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-200">
+                      Paid via Card
                     </span>
-                    <div className={`relative w-11 h-6 rounded-full transition-colors ${
-                      order.payment_confirmed ? 'bg-brand-brown' : 'bg-gray-300'
-                    }`}>
-                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
-                        order.payment_confirmed ? 'translate-x-6' : 'translate-x-1'
-                      }`}></div>
-                    </div>
-                  </button>
+                  ) : (
+                    <button
+                      onClick={() => updatePaymentStatus(order.id, !order.payment_confirmed)}
+                      className="flex items-center gap-2"
+                    >
+                      <span className={`text-sm ${order.payment_confirmed ? 'text-green-600' : 'text-gray-500'}`}>
+                        {order.payment_confirmed ? 'Paid' : 'Not Paid'}
+                      </span>
+                      <div className={`relative w-11 h-6 rounded-full transition-colors ${
+                        order.payment_confirmed ? 'bg-brand-brown' : 'bg-gray-300'
+                      }`}>
+                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                          order.payment_confirmed ? 'translate-x-6' : 'translate-x-1'
+                        }`}></div>
+                      </div>
+                    </button>
+                  )}
                 </div>
               </div>
 
