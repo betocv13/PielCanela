@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle, ChevronLeft } from 'lucide-react'
+import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle, ChevronLeft, Lock } from 'lucide-react'
 import { useCart } from '@/components/providers/CartProvider'
 import { formatPrice } from '@/lib/utils'
 import PaymentOptions from './PaymentOptions'
@@ -40,8 +40,15 @@ export default function CheckoutPanel() {
   const [customerEmail, setCustomerEmail] = useState('')
   const [pickupDate, setPickupDate] = useState('')
   const [pickupTime, setPickupTime] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'venmo' | 'cashapp' | null>(null)
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'stripe' | null>(null)
   const [specialNotes, setSpecialNotes] = useState('')
+
+  // Stripe payment state
+  const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [isReadyToConfirm, setIsReadyToConfirm] = useState(false)
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
+  const [paymentError, setPaymentError] = useState<string | null>(null)
+  const [pendingOrderId, setPendingOrderId] = useState<string | null>(null)
 
   // Available time slots
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([])
@@ -165,53 +172,137 @@ export default function CheckoutPanel() {
     }
   }, [subtotal, fetchTaxRate, tax])
 
+  const handlePaymentSuccess = useCallback(() => {
+    setIsReadyToConfirm(false)
+    setIsProcessingPayment(false)
+    setPendingOrderId(null)
+    setOrderComplete(true)
+    clearCart()
+  }, [clearCart])
+
+  const handlePaymentError = useCallback(async (message: string) => {
+    if (pendingOrderId) {
+      await fetch(`/api/orders?id=${pendingOrderId}`, { method: 'DELETE' })
+      setPendingOrderId(null)
+    }
+    setIsReadyToConfirm(false)
+    setIsProcessingPayment(false)
+    setClientSecret(null)
+    setPaymentError(message)
+  }, [pendingOrderId])
+
   const handleSubmit = async () => {
     setError('')
+    setPaymentError(null)
     setLoading(true)
 
-    try {
-      const orderItems = items.map(item => ({
-        productId: item.productId,
-        productName: item.productName,
-        quantity: item.quantity,
-        size: item.size,
-        milk: item.milk,
-        addons: item.addons,
-        specialInstructions: item.specialInstructions,
-        itemTotal: item.itemTotal
-      }))
+    const orderItems = items.map(item => ({
+      productId: item.productId,
+      productName: item.productName,
+      quantity: item.quantity,
+      size: item.size,
+      milk: item.milk,
+      addons: item.addons,
+      specialInstructions: item.specialInstructions,
+      itemTotal: item.itemTotal
+    }))
 
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customer_name: customerName,
-          customer_phone: customerPhone,
-          customer_email: customerEmail || undefined,
-          items: orderItems,
-          subtotal,
-          total,
-          payment_method: paymentMethod,
-          pickup_date: pickupDate,
-          pickup_time: pickupTime,
-          special_notes: specialNotes || undefined
+    // Cash path — same as before
+    if (paymentMethod === 'cash') {
+      try {
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customer_name: customerName,
+            customer_phone: customerPhone,
+            customer_email: customerEmail || undefined,
+            items: orderItems,
+            subtotal,
+            total,
+            payment_method: 'cash',
+            pickup_date: pickupDate,
+            pickup_time: pickupTime,
+            special_notes: specialNotes || undefined
+          })
         })
-      })
 
-      const data = await res.json()
+        const data = await res.json()
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to place order')
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to place order')
+        }
+
+        setOrderNumber(data.order.order_number)
+        setOrderComplete(true)
+        clearCart()
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to place order')
+      } finally {
+        setLoading(false)
       }
-
-      setOrderNumber(data.order.order_number)
-      setOrderComplete(true)
-      clearCart()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to place order')
-    } finally {
-      setLoading(false)
+      return
     }
+
+    // Stripe path
+    setIsProcessingPayment(true)
+
+    // Step 1: Create the order row
+    const orderRes = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customer_name: customerName,
+        customer_phone: customerPhone,
+        customer_email: customerEmail || undefined,
+        items: orderItems,
+        subtotal,
+        total,
+        payment_method: 'stripe',
+        pickup_date: pickupDate,
+        pickup_time: pickupTime,
+        special_notes: specialNotes || undefined
+      })
+    })
+
+    const orderData = await orderRes.json()
+
+    if (!orderRes.ok) {
+      setIsProcessingPayment(false)
+      setLoading(false)
+      setError(orderData.error || 'Failed to place order')
+      return
+    }
+
+    const createdOrderId = orderData.order.id
+    setPendingOrderId(createdOrderId)
+    setOrderNumber(orderData.order.order_number)
+
+    // Step 2: Create the PaymentIntent
+    const intentRes = await fetch('/api/create-payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId: createdOrderId,
+        amount: Math.round(total * 100)
+      })
+    })
+
+    const intentData = await intentRes.json()
+
+    if (!intentRes.ok) {
+      await fetch(`/api/orders?id=${createdOrderId}`, { method: 'DELETE' })
+      setPendingOrderId(null)
+      setIsProcessingPayment(false)
+      setLoading(false)
+      setError(intentData.error || 'Failed to initialize payment')
+      return
+    }
+
+    // Step 3: Hand off to StripePaymentForm via isReadyToConfirm
+    setLoading(false)
+    setClientSecret(intentData.clientSecret)
+    setIsReadyToConfirm(true)
   }
 
   const handleClose = () => {
@@ -227,6 +318,11 @@ export default function CheckoutPanel() {
       setPaymentMethod(null)
       setSpecialNotes('')
       setError('')
+      setClientSecret(null)
+      setIsReadyToConfirm(false)
+      setIsProcessingPayment(false)
+      setPaymentError(null)
+      setPendingOrderId(null)
     }
     setIsCartOpen(false)
   }
@@ -287,7 +383,14 @@ export default function CheckoutPanel() {
             <div className="flex items-center gap-2">
               {step > 1 && (
                 <button
-                  onClick={() => setStep(step - 1)}
+                  onClick={() => {
+                    if (step === 3) {
+                      setClientSecret(null)
+                      setIsReadyToConfirm(false)
+                      setPaymentError(null)
+                    }
+                    setStep(step - 1)
+                  }}
                   className="p-1 rounded-full hover:bg-gray-100"
                 >
                   <ChevronLeft className="w-5 h-5 text-gray-500" />
@@ -520,9 +623,15 @@ export default function CheckoutPanel() {
                 <div className="space-y-4">
                   <PaymentOptions
                     selectedMethod={paymentMethod}
-                    onSelect={setPaymentMethod}
-                    orderNumber={orderNumber || 'pending'}
+                    onSelect={(method) => {
+                      setPaymentMethod(method)
+                      setPaymentError(null)
+                    }}
                     total={total}
+                    clientSecret={clientSecret}
+                    isReadyToConfirm={isReadyToConfirm}
+                    onPaymentSuccess={handlePaymentSuccess}
+                    onPaymentError={handlePaymentError}
                   />
 
                   {error && (
@@ -579,22 +688,34 @@ export default function CheckoutPanel() {
             )}
 
             {step === 3 && (
-              <button
-                onClick={handleSubmit}
-                disabled={!canPlaceOrder || loading}
-                className="w-full bg-brand-brown text-white py-4 px-4 rounded-button font-semibold text-lg
-                           hover:bg-brand-brown/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed
-                           flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Placing Order...
-                  </>
-                ) : (
-                  `Place Order - ${formatPrice(total)}`
+              <>
+                {paymentError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                    {paymentError}
+                  </div>
                 )}
-              </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={!canPlaceOrder || loading || isProcessingPayment}
+                  className="w-full bg-brand-brown text-white py-4 px-4 rounded-button font-semibold text-lg
+                             hover:bg-brand-brown/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+                             flex items-center justify-center gap-2"
+                >
+                  {(loading || isProcessingPayment) ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : paymentMethod === 'stripe' ? (
+                    <>
+                      <Lock className="w-4 h-4" />
+                      {`Pay ${formatPrice(total)}`}
+                    </>
+                  ) : (
+                    `Place Order — ${formatPrice(total)}`
+                  )}
+                </button>
+              </>
             )}
           </div>
         )}

@@ -222,3 +222,33 @@ export async function POST(request: Request) {
     )
   }
 }
+
+// DELETE - Clean up a failed Stripe order
+// Only deletes unconfirmed Stripe orders created within the last 10 minutes.
+// This is called client-side after a card decline to remove the orphan order row.
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const orderId = searchParams.get('id')
+
+  if (!orderId) {
+    return NextResponse.json({ error: 'Order ID required' }, { status: 400 })
+  }
+
+  const supabase = await createClient()
+  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString()
+
+  const { error } = await supabase
+    .from('orders')
+    .delete()
+    .eq('id', orderId)
+    .eq('payment_method', 'stripe')
+    .eq('payment_confirmed', false)
+    .gte('created_at', tenMinutesAgo)
+
+  if (error) {
+    console.error('Error deleting failed Stripe order:', error)
+    return NextResponse.json({ error: 'Failed to cancel order' }, { status: 500 })
+  }
+
+  return NextResponse.json({ success: true })
+}
