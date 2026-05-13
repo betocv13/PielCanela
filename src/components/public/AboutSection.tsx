@@ -1,7 +1,15 @@
+'use client'
+
+import { useState } from 'react'
+
 const COFFEES_IMAGE =
   'https://eobgaersvyjrbvykqqug.supabase.co/storage/v1/object/public/About/Coffees.webp'
+const COFFEES_FALLBACK =
+  'https://eobgaersvyjrbvykqqug.supabase.co/storage/v1/object/public/About/coffees.png'
 
 export default function AboutSection() {
+  const [imgSrc, setImgSrc] = useState(COFFEES_IMAGE)
+
   return (
     <section className="bg-white py-6">
       <div
@@ -37,8 +45,9 @@ export default function AboutSection() {
         {/* Mobile: absolute, anchored to bottom, wider than card so sides bleed and overflow-hidden clips */}
         <img
           className="md:hidden absolute"
-          src={COFFEES_IMAGE}
+          src={imgSrc}
           alt="Piel Canela drinks"
+          onError={() => setImgSrc(COFFEES_FALLBACK)}
           style={{
             width: '100%',
             height: 'auto',
@@ -54,8 +63,9 @@ export default function AboutSection() {
           style={{ bottom: '-30px', height: '480px' }}
         >
           <img
-            src={COFFEES_IMAGE}
+            src={imgSrc}
             alt="Piel Canela drinks"
+            onError={() => setImgSrc(COFFEES_FALLBACK)}
             style={{
               width: '100%',
               height: '100%',
