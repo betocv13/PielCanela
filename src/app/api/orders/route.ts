@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import type { CreateOrderPayload } from '@/types'
 
@@ -234,7 +234,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: 'Order ID required' }, { status: 400 })
   }
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString()
 
   const { error } = await supabase

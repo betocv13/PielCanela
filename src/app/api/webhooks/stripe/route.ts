@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   switch (event.type) {
     case 'payment_intent.succeeded': {
