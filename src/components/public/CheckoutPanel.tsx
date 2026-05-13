@@ -172,28 +172,12 @@ export default function CheckoutPanel() {
     }
   }, [subtotal, fetchTaxRate, tax])
 
-  const handlePaymentSuccess = useCallback(() => {
-    setIsReadyToConfirm(false)
-    setIsProcessingPayment(false)
-    setPendingOrderId(null)
-    setOrderComplete(true)
-    clearCart()
-  }, [clearCart])
-
-  const handlePaymentError = useCallback(async (message: string) => {
-    if (pendingOrderId) {
-      await fetch(`/api/orders?id=${pendingOrderId}`, { method: 'DELETE' })
-      setPendingOrderId(null)
-    }
-    setIsReadyToConfirm(false)
-    setIsProcessingPayment(false)
-    setClientSecret(null)
-    setPaymentError(message)
-  }, [pendingOrderId])
-
-  const handleSubmit = async () => {
-    setError('')
+  const handlePaymentMethodSelect = async (method: 'cash' | 'stripe') => {
+    setPaymentMethod(method)
     setPaymentError(null)
+
+    if (method !== 'stripe' || clientSecret !== null) return
+
     setLoading(true)
 
     const orderItems = items.map(item => ({
@@ -207,47 +191,6 @@ export default function CheckoutPanel() {
       itemTotal: item.itemTotal
     }))
 
-    // Cash path — same as before
-    if (paymentMethod === 'cash') {
-      try {
-        const res = await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            customer_name: customerName,
-            customer_phone: customerPhone,
-            customer_email: customerEmail || undefined,
-            items: orderItems,
-            subtotal,
-            total,
-            payment_method: 'cash',
-            pickup_date: pickupDate,
-            pickup_time: pickupTime,
-            special_notes: specialNotes || undefined
-          })
-        })
-
-        const data = await res.json()
-
-        if (!res.ok) {
-          throw new Error(data.error || 'Failed to place order')
-        }
-
-        setOrderNumber(data.order.order_number)
-        setOrderComplete(true)
-        clearCart()
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to place order')
-      } finally {
-        setLoading(false)
-      }
-      return
-    }
-
-    // Stripe path
-    setIsProcessingPayment(true)
-
-    // Step 1: Create the order row
     const orderRes = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -268,9 +211,9 @@ export default function CheckoutPanel() {
     const orderData = await orderRes.json()
 
     if (!orderRes.ok) {
-      setIsProcessingPayment(false)
       setLoading(false)
-      setError(orderData.error || 'Failed to place order')
+      setError(orderData.error || 'Failed to create order')
+      setPaymentMethod(null)
       return
     }
 
@@ -278,7 +221,6 @@ export default function CheckoutPanel() {
     setPendingOrderId(createdOrderId)
     setOrderNumber(orderData.order.order_number)
 
-    // Step 2: Create the PaymentIntent
     const intentRes = await fetch('/api/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -293,19 +235,112 @@ export default function CheckoutPanel() {
     if (!intentRes.ok) {
       await fetch(`/api/orders?id=${createdOrderId}`, { method: 'DELETE' })
       setPendingOrderId(null)
-      setIsProcessingPayment(false)
       setLoading(false)
       setError(intentData.error || 'Failed to initialize payment')
+      setPaymentMethod(null)
       return
     }
 
-    // Step 3: Hand off to StripePaymentForm via isReadyToConfirm
-    setLoading(false)
     setClientSecret(intentData.clientSecret)
-    setIsReadyToConfirm(true)
+    setLoading(false)
   }
 
-  const handleClose = () => {
+  const handlePaymentSuccess = useCallback(() => {
+    setIsReadyToConfirm(false)
+    setIsProcessingPayment(false)
+    setPendingOrderId(null)
+    setOrderComplete(true)
+    clearCart()
+  }, [clearCart])
+
+  const handlePaymentError = useCallback(async (message: string) => {
+    setPaymentError(message)
+    setIsReadyToConfirm(false)
+    setIsProcessingPayment(false)
+    setClientSecret(null)
+
+    if (pendingOrderId) {
+      await fetch(`/api/orders?id=${pendingOrderId}`, { method: 'DELETE' })
+      setPendingOrderId(null)
+    }
+
+    // Reset method after a delay so the customer can read the error first
+    setTimeout(() => {
+      setPaymentMethod(null)
+    }, 2000)
+  }, [pendingOrderId])
+
+  const handleSubmit = async () => {
+    setError('')
+    setPaymentError(null)
+
+    // Stripe path: order + intent already created on method selection, just confirm
+    if (paymentMethod === 'stripe') {
+      setIsProcessingPayment(true)
+      setIsReadyToConfirm(true)
+      return
+    }
+
+    // Cash path
+    setLoading(true)
+
+    const orderItems = items.map(item => ({
+      productId: item.productId,
+      productName: item.productName,
+      quantity: item.quantity,
+      size: item.size,
+      milk: item.milk,
+      addons: item.addons,
+      specialInstructions: item.specialInstructions,
+      itemTotal: item.itemTotal
+    }))
+
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: customerName,
+          customer_phone: customerPhone,
+          customer_email: customerEmail || undefined,
+          items: orderItems,
+          subtotal,
+          total,
+          payment_method: 'cash',
+          pickup_date: pickupDate,
+          pickup_time: pickupTime,
+          special_notes: specialNotes || undefined
+        })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to place order')
+      }
+
+      setOrderNumber(data.order.order_number)
+      setOrderComplete(true)
+      clearCart()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to place order')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleClose = async () => {
+    // Delete orphan Stripe order if panel is closed before payment completes
+    if (pendingOrderId && !orderComplete) {
+      await fetch(`/api/orders?id=${pendingOrderId}`, { method: 'DELETE' })
+      setPendingOrderId(null)
+      setClientSecret(null)
+      setIsReadyToConfirm(false)
+      setIsProcessingPayment(false)
+      setPaymentMethod(null)
+      setPaymentError(null)
+    }
+
     if (orderComplete) {
       setStep(1)
       setOrderComplete(false)
@@ -332,7 +367,7 @@ export default function CheckoutPanel() {
   // Validation for each step
   const canProceedStep1 = items.length > 0
   const canProceedStep2 = customerName && customerPhone && pickupDate && pickupTime
-  const canPlaceOrder = canProceedStep2 && paymentMethod !== null
+  const canPlaceOrder = canProceedStep2 && paymentMethod !== null && (paymentMethod !== 'stripe' || clientSecret !== null)
 
   // Step titles
   const stepTitles = ['Your Order', 'Pickup Details', 'Payment']
@@ -383,11 +418,16 @@ export default function CheckoutPanel() {
             <div className="flex items-center gap-2">
               {step > 1 && (
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (step === 3) {
+                      if (pendingOrderId) {
+                        await fetch(`/api/orders?id=${pendingOrderId}`, { method: 'DELETE' })
+                        setPendingOrderId(null)
+                      }
                       setClientSecret(null)
                       setIsReadyToConfirm(false)
                       setPaymentError(null)
+                      setPaymentMethod(null)
                     }
                     setStep(step - 1)
                   }}
@@ -623,10 +663,7 @@ export default function CheckoutPanel() {
                 <div className="space-y-4">
                   <PaymentOptions
                     selectedMethod={paymentMethod}
-                    onSelect={(method) => {
-                      setPaymentMethod(method)
-                      setPaymentError(null)
-                    }}
+                    onSelect={handlePaymentMethodSelect}
                     total={total}
                     clientSecret={clientSecret}
                     isReadyToConfirm={isReadyToConfirm}
