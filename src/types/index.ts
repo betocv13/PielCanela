@@ -65,7 +65,8 @@ export interface Order {
   subtotal: number
   tax: number
   total: number
-  payment_method: 'cash' | 'venmo' | 'cashapp'
+  payment_method: 'cash' | 'venmo' | 'cashapp' | 'stripe'
+  stripe_payment_intent_id?: string
   payment_confirmed: boolean
   status: 'pending' | 'ready' | 'completed'
   pickup_date: string
@@ -110,10 +111,6 @@ export interface Setting {
 export interface AppSettings {
   ordering_enabled: boolean
   ordering_closed_message: string
-  venmo_username: string
-  cashapp_username: string
-  venmo_qr_url: string
-  cashapp_qr_url: string
   owner_email: string
   notification_frequency: 'instant' | 'batched' | 'daily'
   global_milk_options: MilkOption[]
@@ -138,7 +135,7 @@ export interface CreateOrderPayload {
   items: OrderItem[]
   subtotal: number
   total: number
-  payment_method: 'cash' | 'venmo' | 'cashapp'
+  payment_method: 'cash' | 'stripe'
   pickup_date: string
   pickup_time: string
   special_notes?: string
