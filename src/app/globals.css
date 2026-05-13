@@ -214,8 +214,8 @@ h1, h2, h3, h4, h5, h6 {
   flex-shrink: 0;
   aspect-ratio: 1 / 1;
   border-radius: var(--content-radius);
-  /* Mobile: 83% of inner container → ~1.2 cards visible */
-  width: calc((100vw - 2 * var(--content-inset) - 64px) * 0.83);
+  /* Mobile: 90% of inner container → slightly larger cards */
+  width: calc((100vw - 2 * var(--content-inset) - 64px) * 0.90);
 }
 
 @media (min-width: 768px) {
