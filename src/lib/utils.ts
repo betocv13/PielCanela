@@ -34,30 +34,6 @@ export function formatTime(time: string): string {
   return `${hour12}:${minutes} ${ampm}`
 }
 
-// Generate Venmo payment link
-export function generateVenmoLink(
-  username: string,
-  amount: number,
-  orderNumber: string
-): { deepLink: string; webLink: string } {
-  const cleanUsername = username.replace('@', '')
-  const note = encodeURIComponent(`Order-${orderNumber}`)
-
-  return {
-    deepLink: `venmo://paycharge?txn=pay&recipients=${cleanUsername}&amount=${amount.toFixed(2)}&note=${note}`,
-    webLink: `https://venmo.com/?txn=pay&recipients=${cleanUsername}&amount=${amount.toFixed(2)}&note=${note}`,
-  }
-}
-
-// Generate Cash App payment link
-export function generateCashAppLink(
-  cashtag: string,
-  amount: number
-): string {
-  const cleanCashtag = cashtag.replace('$', '')
-  return `https://cash.app/$${cleanCashtag}/${amount.toFixed(2)}`
-}
-
 // Generate time slots between open and close times
 export function generateTimeSlots(
   openTime: string,
