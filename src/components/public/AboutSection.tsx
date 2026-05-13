@@ -1,5 +1,5 @@
 const COFFEES_IMAGE =
-  'https://eobgaersvyjrbvykqqug.supabase.co/storage/v1/object/public/About/coffees.png'
+  'https://eobgaersvyjrbvykqqug.supabase.co/storage/v1/object/public/About/Coffees.webp'
 
 export default function AboutSection() {
   return (
