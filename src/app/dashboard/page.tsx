@@ -364,6 +364,11 @@ export default function OrdersPage() {
                             {[item.milk, ...item.addons].filter(Boolean).join(', ')}
                           </p>
                         )}
+                        {item.specialInstructions && (
+                          <p className="text-brand-brown/70 text-xs ml-3 italic">
+                            Note: {item.specialInstructions}
+                          </p>
+                        )}
                       </div>
                       <span className="text-brand-brown font-medium">
                         ${item.itemTotal.toFixed(2)}
