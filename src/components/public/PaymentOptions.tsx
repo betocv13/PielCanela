@@ -108,7 +108,7 @@ export default function PaymentOptions({
     <div className="space-y-4">
       <h3 className="text-lg font-menu font-bold text-brand-brown">Payment Method</h3>
 
-      <div className="grid gap-3">
+      <div className="grid grid-cols-2 gap-3">
         {paymentMethods.map((method) => {
           const Icon = method.icon
           const isSelected = selectedMethod === method.id
@@ -118,7 +118,7 @@ export default function PaymentOptions({
               key={method.id}
               type="button"
               onClick={() => onSelect(method.id)}
-              className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-all text-left ${
+              className={`flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all text-center ${
                 isSelected
                   ? 'border-brand-brown bg-brand-cream'
                   : 'border-gray-200 hover:border-brand-brown/50'
@@ -127,21 +127,10 @@ export default function PaymentOptions({
               <div className={`p-2 rounded-lg bg-gray-100 ${method.color}`}>
                 <Icon className="w-6 h-6" />
               </div>
-              <div className="flex-1">
-                <p className="font-menu font-bold text-brand-brown">{method.name}</p>
-                <p className="text-sm text-brand-brown/60">{method.description}</p>
-              </div>
-              <div
-                className={`w-5 h-5 rounded-full border-2 ${
-                  isSelected ? 'border-brand-brown bg-brand-brown' : 'border-gray-300'
-                }`}
-              >
-                {isSelected && (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-white" />
-                  </div>
-                )}
-              </div>
+              <p className="font-menu font-bold text-brand-brown text-sm">{method.name}</p>
+              {isSelected && (
+                <div className="w-2 h-2 rounded-full bg-brand-brown" />
+              )}
             </button>
           )
         })}
