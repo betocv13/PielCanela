@@ -176,7 +176,21 @@ export default function CheckoutPanel() {
     setPaymentMethod(method)
     setPaymentError(null)
 
-    if (method !== 'stripe' || clientSecret !== null) return
+    // If switching away from stripe and there's a pending order, delete it
+    if (pendingOrderId && method !== 'stripe') {
+      await fetch(`/api/orders?id=${pendingOrderId}`, { method: 'DELETE' })
+      setPendingOrderId(null)
+      setClientSecret(null)
+      setIsReadyToConfirm(false)
+    }
+
+    // If switching back to stripe, reset clientSecret so a fresh order is created
+    if (method === 'stripe') {
+      setClientSecret(null)
+      setIsReadyToConfirm(false)
+    }
+
+    if (method !== 'stripe') return
 
     setLoading(true)
 

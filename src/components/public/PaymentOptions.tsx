@@ -118,7 +118,7 @@ export default function PaymentOptions({
               key={method.id}
               type="button"
               onClick={() => onSelect(method.id)}
-              className={`flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all text-center ${
+              className={`flex flex-col items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all text-center ${
                 isSelected
                   ? 'border-brand-brown bg-brand-cream'
                   : 'border-gray-200 hover:border-brand-brown/50'
@@ -128,9 +128,6 @@ export default function PaymentOptions({
                 <Icon className="w-6 h-6" />
               </div>
               <p className="font-menu font-bold text-brand-brown text-sm">{method.name}</p>
-              {isSelected && (
-                <div className="w-2 h-2 rounded-full bg-brand-brown" />
-              )}
             </button>
           )
         })}
