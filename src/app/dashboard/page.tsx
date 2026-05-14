@@ -6,7 +6,7 @@ import { Clock, User, Phone, ChevronDown } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Order } from '@/types'
 
-type FilterTab = 'all' | 'pending_payment' | 'completed'
+type FilterTab = 'all' | 'cancelled' | 'completed'
 type SortOption = 'pickup_time' | 'created_at' | 'order_number'
 
 export default function OrdersPage() {
@@ -20,7 +20,6 @@ export default function OrdersPage() {
 
   // Calculate stats
   const todaysOrders = orders.filter(order => isToday(parseISO(order.pickup_date))).length
-  const pendingPayment = orders.filter(order => !order.payment_confirmed && order.status !== 'completed').length
   const readyOrders = orders.filter(order => order.status === 'ready').length
 
   const fetchOrders = useCallback(async () => {
@@ -83,12 +82,12 @@ export default function OrdersPage() {
   // Filter orders based on active tab
   const filteredOrders = orders.filter(order => {
     switch (activeTab) {
-      case 'pending_payment':
-        return !order.payment_confirmed && order.status !== 'completed'
+      case 'cancelled':
+        return order.status === 'cancelled'
       case 'completed':
         return order.status === 'completed'
       default:
-        return order.status !== 'completed' // All Orders shows only active orders
+        return order.status !== 'completed' && order.status !== 'cancelled'
     }
   })
 
@@ -204,8 +203,8 @@ export default function OrdersPage() {
           <p className="text-2xl lg:text-3xl font-bold text-brand-brown">{todaysOrders}</p>
         </div>
         <div className="bg-[#F5F0E8] rounded-lg p-4">
-          <p className="text-sm text-brand-brown/70 mb-1">Pending Payment</p>
-          <p className="text-2xl lg:text-3xl font-bold text-[#8B4513]">{pendingPayment}</p>
+          <p className="text-sm text-brand-brown/70 mb-1">Cancelled</p>
+          <p className="text-2xl lg:text-3xl font-bold text-red-600">{orders.filter(order => order.status === 'cancelled').length}</p>
         </div>
         <div className="bg-[#F5F0E8] rounded-lg p-4">
           <p className="text-sm text-brand-brown/70 mb-1">Ready</p>
@@ -227,14 +226,14 @@ export default function OrdersPage() {
             All Orders
           </button>
           <button
-            onClick={() => setActiveTab('pending_payment')}
+            onClick={() => setActiveTab('cancelled')}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'pending_payment'
+              activeTab === 'cancelled'
                 ? 'border-brand-brown text-brand-brown'
                 : 'border-transparent text-gray-500 hover:text-brand-brown'
             }`}
           >
-            Pending Payment
+            Cancelled
           </button>
           <button
             onClick={() => setActiveTab('completed')}
@@ -290,7 +289,7 @@ export default function OrdersPage() {
             className="w-full appearance-none bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm text-brand-brown pr-10"
           >
             <option value="all">All Orders</option>
-            <option value="pending_payment">Pending Payment</option>
+            <option value="cancelled">Cancelled</option>
             <option value="completed">Completed</option>
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-brown pointer-events-none" />
