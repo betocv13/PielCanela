@@ -20,7 +20,16 @@ export default function OrdersPage() {
 
   // Calculate stats
   const todaysOrders = orders.filter(order => isToday(parseISO(order.pickup_date))).length
-  const readyOrders = orders.filter(order => order.status === 'ready').length
+
+  const completedToday = orders.filter(order =>
+    order.status === 'completed' && isToday(parseISO(order.pickup_date))
+  ).length
+
+  const todaysRevenue = orders
+    .filter(order =>
+      isToday(parseISO(order.pickup_date)) && order.status !== 'cancelled'
+    )
+    .reduce((sum, order) => sum + order.total, 0)
 
   const fetchOrders = useCallback(async () => {
     const supabase = createClient()
@@ -203,12 +212,14 @@ export default function OrdersPage() {
           <p className="text-2xl lg:text-3xl font-bold text-brand-brown">{todaysOrders}</p>
         </div>
         <div className="bg-[#F5F0E8] rounded-lg p-4">
-          <p className="text-sm text-brand-brown/70 mb-1">Cancelled</p>
-          <p className="text-2xl lg:text-3xl font-bold text-red-600">{orders.filter(order => order.status === 'cancelled').length}</p>
+          <p className="text-sm text-brand-brown/70 mb-1">Completed</p>
+          <p className="text-2xl lg:text-3xl font-bold text-green-600">{completedToday}</p>
         </div>
         <div className="bg-[#F5F0E8] rounded-lg p-4">
-          <p className="text-sm text-brand-brown/70 mb-1">Ready</p>
-          <p className="text-2xl lg:text-3xl font-bold text-green-600">{readyOrders}</p>
+          <p className="text-sm text-brand-brown/70 mb-1">Revenue</p>
+          <p className="text-2xl lg:text-3xl font-bold text-brand-brown">
+            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(todaysRevenue)}
+          </p>
         </div>
       </div>
 
