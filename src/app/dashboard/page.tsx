@@ -15,6 +15,8 @@ export default function OrdersPage() {
   const [activeTab, setActiveTab] = useState<FilterTab>('all')
   const [sortBy, setSortBy] = useState<SortOption>('pickup_time')
   const [showSortDropdown, setShowSortDropdown] = useState(false)
+  const [confirmingComplete, setConfirmingComplete] = useState<{ id: string; orderNumber: string } | null>(null)
+  const [confirmingCancel, setConfirmingCancel] = useState<{ id: string; orderNumber: string } | null>(null)
 
   // Calculate stats
   const todaysOrders = orders.filter(order => isToday(parseISO(order.pickup_date))).length
@@ -142,6 +144,19 @@ export default function OrdersPage() {
       return
     }
 
+    fetchOrders()
+  }
+
+  const cancelOrder = async (orderId: string) => {
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: 'cancelled' })
+      .eq('id', orderId)
+    if (error) {
+      console.error('Error cancelling order:', error)
+      return
+    }
     fetchOrders()
   }
 
@@ -320,13 +335,7 @@ export default function OrdersPage() {
           {sortedOrders.map((order) => (
             <div
               key={order.id}
-              className={`bg-white rounded-lg shadow-sm overflow-hidden border-t-4 ${
-                order.status === 'ready'
-                  ? 'border-t-green-500'
-                  : order.status === 'completed'
-                  ? 'border-t-gray-400'
-                  : 'border-t-red-500'
-              }`}
+              className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200"
             >
               {/* Order Header */}
               <div className="p-4 border-b border-gray-100">
@@ -387,7 +396,7 @@ export default function OrdersPage() {
                 </p>
               </div>
 
-              {/* Payment Status */}
+              {/* Payment Info */}
               <div className="px-4 py-3 border-b border-gray-100">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-brand-brown">PAYMENT:</span>
@@ -402,61 +411,39 @@ export default function OrdersPage() {
                       </span>
                     )
                   ) : (
-                    <button
-                      onClick={() => updatePaymentStatus(order.id, !order.payment_confirmed)}
-                      className="flex items-center gap-2"
-                    >
-                      <span className={`text-sm ${order.payment_confirmed ? 'text-green-600' : 'text-gray-500'}`}>
-                        {order.payment_confirmed ? 'Paid' : 'Not Paid'}
-                      </span>
-                      <div className={`relative w-11 h-6 rounded-full transition-colors ${
-                        order.payment_confirmed ? 'bg-brand-brown' : 'bg-gray-300'
-                      }`}>
-                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
-                          order.payment_confirmed ? 'translate-x-6' : 'translate-x-1'
-                        }`}></div>
-                      </div>
-                    </button>
+                    <span className="text-sm font-medium text-brand-brown/70 bg-brand-cream px-3 py-1 rounded-full border border-brand-brown/20">
+                      Cash on Pickup
+                    </span>
                   )}
                 </div>
               </div>
 
-              {/* Order Status */}
-              <div className="px-4 py-3 border-b border-gray-100">
-                <p className="text-sm font-medium text-brand-brown mb-2">STATUS:</p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => updateOrderStatus(order.id, 'pending')}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                      order.status === 'pending'
-                        ? 'bg-brand-brown text-white'
-                        : 'bg-gray-100 text-brand-brown hover:bg-gray-200'
-                    }`}
-                  >
-                    Pending
-                  </button>
-                  <button
-                    onClick={() => updateOrderStatus(order.id, 'ready')}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                      order.status === 'ready'
-                        ? 'bg-brand-brown text-white'
-                        : 'bg-gray-100 text-brand-brown hover:bg-gray-200'
-                    }`}
-                  >
-                    Ready
-                  </button>
-                  <button
-                    onClick={() => updateOrderStatus(order.id, 'completed')}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                      order.status === 'completed'
-                        ? 'bg-brand-brown text-white'
-                        : 'bg-gray-100 text-brand-brown hover:bg-gray-200'
-                    }`}
-                  >
-                    Done
-                  </button>
+              {order.status !== 'completed' && order.status !== 'cancelled' && (
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setConfirmingCancel({ id: order.id, orderNumber: order.order_number })}
+                      className="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                    >
+                      Cancel Order
+                    </button>
+                    <button
+                      onClick={() => setConfirmingComplete({ id: order.id, orderNumber: order.order_number })}
+                      className="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-brand-brown text-white hover:bg-brand-brown/90 transition-colors"
+                    >
+                      Complete Order
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {order.status === 'cancelled' && (
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                    Cancelled
+                  </span>
+                </div>
+              )}
 
               {/* Order Footer */}
               <div className="px-4 py-3 bg-gray-50 text-xs text-brand-brown/60">
@@ -465,6 +452,62 @@ export default function OrdersPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Complete Order Confirmation */}
+      {confirmingComplete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setConfirmingComplete(null)} />
+          <div className="relative bg-white rounded-xl shadow-xl p-6 mx-4 max-w-sm w-full">
+            <h3 className="text-lg font-bold text-brand-brown mb-2">Complete Order #{confirmingComplete.orderNumber}?</h3>
+            <p className="text-sm text-gray-500 mb-6">This will mark the order as done and remove it from your active queue after 1 hour.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmingComplete(null)}
+                className="flex-1 py-2 px-4 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  updateOrderStatus(confirmingComplete.id, 'completed')
+                  setConfirmingComplete(null)
+                }}
+                className="flex-1 py-2 px-4 rounded-lg text-sm font-medium bg-brand-brown text-white hover:bg-brand-brown/90 transition-colors"
+              >
+                Complete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Order Confirmation */}
+      {confirmingCancel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setConfirmingCancel(null)} />
+          <div className="relative bg-white rounded-xl shadow-xl p-6 mx-4 max-w-sm w-full">
+            <h3 className="text-lg font-bold text-brand-brown mb-2">Cancel Order #{confirmingCancel.orderNumber}?</h3>
+            <p className="text-sm text-gray-500 mb-6">This will mark the order as cancelled. It will remain visible on the dashboard.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmingCancel(null)}
+                className="flex-1 py-2 px-4 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={() => {
+                  cancelOrder(confirmingCancel.id)
+                  setConfirmingCancel(null)
+                }}
+                className="flex-1 py-2 px-4 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors"
+              >
+                Cancel Order
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
