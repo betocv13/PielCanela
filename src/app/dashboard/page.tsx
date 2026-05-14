@@ -392,9 +392,15 @@ export default function OrdersPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-brand-brown">PAYMENT:</span>
                   {order.payment_method === 'stripe' ? (
-                    <span className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-200">
-                      Paid via Card
-                    </span>
+                    order.payment_confirmed ? (
+                      <span className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-200">
+                        Paid via Card
+                      </span>
+                    ) : (
+                      <span className="text-sm font-medium text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-200">
+                        Awaiting Payment
+                      </span>
+                    )
                   ) : (
                     <button
                       onClick={() => updatePaymentStatus(order.id, !order.payment_confirmed)}
