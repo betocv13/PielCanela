@@ -131,22 +131,6 @@ export default function OrdersPage() {
     fetchOrders()
   }
 
-  const updatePaymentStatus = async (orderId: string, confirmed: boolean) => {
-    const supabase = createClient()
-
-    const { error } = await supabase
-      .from('orders')
-      .update({ payment_confirmed: confirmed })
-      .eq('id', orderId)
-
-    if (error) {
-      console.error('Error updating payment status:', error)
-      return
-    }
-
-    fetchOrders()
-  }
-
   const cancelOrder = async (orderId: string) => {
     const supabase = createClient()
     const { error } = await supabase
