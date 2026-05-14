@@ -68,7 +68,7 @@ export interface Order {
   payment_method: 'cash' | 'venmo' | 'cashapp' | 'stripe'
   stripe_payment_intent_id?: string
   payment_confirmed: boolean
-  status: 'pending' | 'ready' | 'completed'
+  status: 'pending' | 'ready' | 'completed' | 'cancelled'
   pickup_date: string
   pickup_time: string
   special_notes: string | null
