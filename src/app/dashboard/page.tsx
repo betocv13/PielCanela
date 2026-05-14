@@ -36,6 +36,22 @@ export default function OrdersPage() {
       .eq('status', 'completed')
       .lt('completed_at', oneHourAgo)
 
+    // Clean up old cancelled orders (older than 24 hours)
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    await supabase
+      .from('orders')
+      .delete()
+      .eq('status', 'cancelled')
+      .lt('created_at', oneDayAgo)
+
+    // Clean up abandoned pending orders (older than 2 days — pickup date has passed)
+    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+    await supabase
+      .from('orders')
+      .delete()
+      .eq('status', 'pending')
+      .lt('created_at', twoDaysAgo)
+
     // Fetch active orders (not completed) and today's completed orders
     const { data, error } = await supabase
       .from('orders')
