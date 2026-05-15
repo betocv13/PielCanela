@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle, ChevronLeft, Lock } from 'lucide-react'
+import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle, ChevronLeft, Lock, MapPin, CalendarPlus } from 'lucide-react'
 import { useCart } from '@/components/providers/CartProvider'
 import { formatPrice } from '@/lib/utils'
 import PaymentOptions from './PaymentOptions'
@@ -389,30 +389,103 @@ export default function CheckoutPanel() {
   if (!isCartOpen) return null
 
   // Order complete screen
+  const handleAddToCalendar = () => {
+    const [year, month, day] = pickupDate.split('-').map(Number)
+    const [hour, minute] = pickupTime.split(':').map(Number)
+
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const dateStr = `${year}${pad(month)}${pad(day)}T${pad(hour)}${pad(minute)}00`
+    // End time: 15 minutes after pickup
+    const endMinute = minute + 15
+    const endHour = hour + Math.floor(endMinute / 60)
+    const endStr = `${year}${pad(month)}${pad(day)}T${pad(endHour)}${pad(endMinute % 60)}00`
+
+    const description = `Piel Canela pickup order #${orderNumber}\\nLocation: 339 E Marion St\\, Des Moines\\, IA 50315\\nPlease go to the garage door entrance. You're welcome to park in the garage or walk up—just send us a message on Instagram or Facebook when you arrive so we can bring your order out promptly.`
+
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Piel Canela//Order Pickup//EN',
+      'BEGIN:VEVENT',
+      `DTSTART:${dateStr}`,
+      `DTEND:${endStr}`,
+      `SUMMARY:Piel Canela Pickup - Order #${orderNumber}`,
+      `LOCATION:339 E Marion St\\, Des Moines\\, IA 50315`,
+      `DESCRIPTION:${description}`,
+      'BEGIN:VALARM',
+      'TRIGGER:-PT15M',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:Reminder',
+      'END:VALARM',
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n')
+
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `piel-canela-order-${orderNumber}.ics`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   if (orderComplete) {
     return (
       <div className="fixed inset-0 z-50">
         <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
         <div className="absolute right-0 top-0 h-full w-full md:max-w-lg bg-white shadow-xl flex flex-col">
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-            <CheckCircle className="w-20 h-20 text-green-500 mb-6" />
-            <h2 className="text-3xl font-menu font-bold text-brand-brown mb-3">Order Placed!</h2>
-            <p className="text-lg text-gray-600 mb-2">
-              Your order number is
-            </p>
-            <p className="text-2xl font-bold text-brand-brown mb-6">
-              #{orderNumber}
-            </p>
-            <p className="text-gray-500 mb-8 max-w-sm">
-              Please arrive at your selected pickup time. We&apos;ll have your order ready!
-            </p>
-            <button
-              onClick={handleClose}
-              className="w-full max-w-xs bg-brand-brown text-white py-4 px-6 rounded-button font-semibold text-lg
-                         hover:bg-brand-brown/90 transition-colors"
-            >
-              Done
-            </button>
+          <div className="flex-1 overflow-y-auto">
+            <div className="flex flex-col items-center p-8 text-center">
+              <CheckCircle className="w-20 h-20 text-green-500 mb-6" />
+              <h2 className="text-3xl font-menu font-bold text-brand-brown mb-3">Order Placed!</h2>
+              <p className="text-lg text-gray-600 mb-2">Your order number is</p>
+              <p className="text-2xl font-bold text-brand-brown mb-6">#{orderNumber}</p>
+
+              {/* Pickup details card */}
+              <div className="w-full max-w-sm bg-brand-cream rounded-xl border border-brand-brown/20 p-5 text-left mb-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <MapPin className="w-4 h-4 text-brand-brown flex-shrink-0" />
+                  <span className="font-menu font-bold text-brand-brown text-sm uppercase tracking-wide">Pickup Details</span>
+                </div>
+                <div className="space-y-3 text-sm text-gray-700">
+                  <div>
+                    <p className="font-semibold text-brand-brown mb-0.5">Scheduled pickup</p>
+                    <p>
+                      {pickupDate ? new Date(pickupDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : ''}
+                      {pickupTime ? ` at ${formatTime12Hour(pickupTime)}` : ''}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-brand-brown mb-0.5">Location</p>
+                    <p>339 E Marion St, Des Moines, IA 50315</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-brand-brown mb-0.5">Instructions</p>
+                    <p>Please go to the garage door entrance. You&apos;re welcome to park in the garage or walk up—just send us a message on Instagram or Facebook when you arrive so we can bring your order out promptly.</p>
+                  </div>
+                  <p className="italic text-brand-brown/70">See you soon!</p>
+                </div>
+              </div>
+
+              {/* Add to Calendar */}
+              <button
+                onClick={handleAddToCalendar}
+                className="flex items-center justify-center gap-2 w-full max-w-sm border-2 border-brand-brown text-brand-brown py-3 px-6 rounded-button font-semibold
+                           hover:bg-brand-cream transition-colors mb-3"
+              >
+                <CalendarPlus className="w-4 h-4" />
+                Add to Calendar
+              </button>
+
+              <button
+                onClick={handleClose}
+                className="w-full max-w-sm bg-brand-brown text-white py-4 px-6 rounded-button font-semibold text-lg
+                           hover:bg-brand-brown/90 transition-colors"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       </div>
