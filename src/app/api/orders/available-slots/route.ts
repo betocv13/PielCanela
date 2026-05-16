@@ -72,6 +72,7 @@ export async function GET(request: Request) {
       .from('orders')
       .select('pickup_time')
       .eq('pickup_date', date)
+      .neq('status', 'cancelled')
 
     // Count orders per slot
     const slotCounts: Record<string, number> = {}
