@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle, ChevronLeft, Lock, MapPin, CalendarPlus } from 'lucide-react'
+import { X, Plus, Minus, Trash2, ShoppingBag, Loader2, CheckCircle, ChevronLeft, Lock, MapPin, CalendarPlus, Heart } from 'lucide-react'
 import { useCart } from '@/components/providers/CartProvider'
 import { formatPrice } from '@/lib/utils'
 import PaymentOptions from './PaymentOptions'
@@ -56,7 +56,19 @@ export default function CheckoutPanel() {
 
   // Tax calculation
   const [tax, setTax] = useState(0)
-  const total = subtotal + tax
+
+  // Tip state
+  const [tipPercent, setTipPercent] = useState<number | null>(null)
+  const [customTipAmount, setCustomTipAmount] = useState('')
+  const [showTipOverlay, setShowTipOverlay] = useState(false)
+  const [showCustomTip, setShowCustomTip] = useState(false)
+
+  const tipAmount = tipPercent !== null
+    ? Math.round(subtotal * tipPercent) / 100
+    : customTipAmount && parseFloat(customTipAmount) > 0
+    ? parseFloat(customTipAmount)
+    : 0
+  const total = subtotal + tax + tipAmount
 
   // Lock body scroll when panel is open (works on iOS too)
   useEffect(() => {
@@ -171,6 +183,20 @@ export default function CheckoutPanel() {
       fetchTaxRate()
     }
   }, [subtotal, fetchTaxRate, tax])
+
+  const handleSkipTip = () => {
+    setTipPercent(null)
+    setCustomTipAmount('')
+    setShowCustomTip(false)
+    setShowTipOverlay(false)
+    setStep(2)
+  }
+
+  const handleConfirmTip = () => {
+    setShowTipOverlay(false)
+    setShowCustomTip(false)
+    setStep(2)
+  }
 
   const handlePaymentMethodSelect = async (method: 'cash' | 'stripe') => {
     setPaymentMethod(method)
@@ -372,6 +398,10 @@ export default function CheckoutPanel() {
       setIsProcessingPayment(false)
       setPaymentError(null)
       setPendingOrderId(null)
+      setTipPercent(null)
+      setCustomTipAmount('')
+      setShowCustomTip(false)
+      setShowTipOverlay(false)
     }
     setIsCartOpen(false)
   }
@@ -515,6 +545,11 @@ export default function CheckoutPanel() {
                       setIsReadyToConfirm(false)
                       setPaymentError(null)
                       setPaymentMethod(null)
+                    }
+                    if (step === 2) {
+                      setTipPercent(null)
+                      setCustomTipAmount('')
+                      setShowCustomTip(false)
                     }
                     setStep(step - 1)
                   }}
@@ -769,6 +804,109 @@ export default function CheckoutPanel() {
           )}
         </div>
 
+        {/* Tip overlay */}
+        {showTipOverlay && (
+          <div className="absolute inset-0 z-10 flex items-end justify-center">
+            <div className="absolute inset-0 bg-black/40" onClick={handleSkipTip} />
+            <div className="relative w-full bg-white rounded-t-2xl shadow-xl p-6 pb-8">
+              <div className="flex items-center gap-2 mb-1">
+                <Heart className="w-5 h-5 text-brand-brown" />
+                <h3 className="text-lg font-menu font-bold text-brand-brown">Add a tip?</h3>
+              </div>
+              <p className="text-sm text-gray-500 mb-5">100% of tips go to our team.</p>
+
+              {!showCustomTip ? (
+                <>
+                  <div className="grid grid-cols-4 gap-2 mb-4">
+                    {[15, 20, 25].map((pct) => (
+                      <button
+                        key={pct}
+                        onClick={() => { setTipPercent(pct); setCustomTipAmount('') }}
+                        className={`flex flex-col items-center py-3 rounded-xl border-2 transition-all ${
+                          tipPercent === pct
+                            ? 'border-brand-brown bg-brand-cream'
+                            : 'border-gray-200 hover:border-brand-brown/50'
+                        }`}
+                      >
+                        <span className="font-menu font-bold text-brand-brown">{pct}%</span>
+                        <span className="text-xs text-gray-500 mt-0.5">
+                          {formatPrice(Math.round(subtotal * pct) / 100)}
+                        </span>
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => { setShowCustomTip(true); setTipPercent(null) }}
+                      className={`flex flex-col items-center justify-center py-3 rounded-xl border-2 transition-all ${
+                        customTipAmount && parseFloat(customTipAmount) > 0
+                          ? 'border-brand-brown bg-brand-cream'
+                          : 'border-gray-200 hover:border-brand-brown/50'
+                      }`}
+                    >
+                      <span className="font-menu font-bold text-brand-brown text-sm">Other</span>
+                      {customTipAmount && parseFloat(customTipAmount) > 0 && (
+                        <span className="text-xs text-gray-500 mt-0.5">${parseFloat(customTipAmount).toFixed(2)}</span>
+                      )}
+                    </button>
+                  </div>
+                  <button
+                    onClick={handleConfirmTip}
+                    className="w-full bg-brand-brown text-white py-3 rounded-button font-semibold text-lg hover:bg-brand-brown/90 transition-colors mb-3"
+                  >
+                    {tipPercent !== null
+                      ? `Add ${formatPrice(Math.round(subtotal * tipPercent) / 100)} tip`
+                      : customTipAmount && parseFloat(customTipAmount) > 0
+                      ? `Add ${formatPrice(parseFloat(customTipAmount))} tip`
+                      : 'Continue'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="mb-4">
+                    <label className="block text-sm font-menu font-bold text-brand-brown mb-2">
+                      Enter tip amount
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={customTipAmount}
+                        onChange={(e) => setCustomTipAmount(e.target.value)}
+                        className="w-full pl-7 pr-3 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-brown text-lg"
+                        placeholder="0.00"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleConfirmTip}
+                    disabled={!customTipAmount || parseFloat(customTipAmount) <= 0}
+                    className="w-full bg-brand-brown text-white py-3 rounded-button font-semibold text-lg hover:bg-brand-brown/90 transition-colors mb-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {customTipAmount && parseFloat(customTipAmount) > 0
+                      ? `Add ${formatPrice(parseFloat(customTipAmount))} tip`
+                      : 'Enter an amount'}
+                  </button>
+                  <button
+                    onClick={() => setShowCustomTip(false)}
+                    className="w-full text-sm text-gray-500 hover:text-brand-brown py-1 mb-1"
+                  >
+                    Back to options
+                  </button>
+                </>
+              )}
+
+              <button
+                onClick={handleSkipTip}
+                className="w-full text-sm text-gray-400 hover:text-gray-600 py-2"
+              >
+                No Thanks
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Sticky Footer */}
         {items.length > 0 && (
           <div className="flex-shrink-0 border-t bg-brand-cream/50 p-4 space-y-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
@@ -782,6 +920,12 @@ export default function CheckoutPanel() {
                 <span className="text-gray-600">Tax</span>
                 <span>{formatPrice(tax)}</span>
               </div>
+              {tipAmount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Tip</span>
+                  <span>{formatPrice(tipAmount)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-lg font-bold text-brand-brown pt-1 border-t">
                 <span>Total</span>
                 <span>{formatPrice(total)}</span>
@@ -791,7 +935,7 @@ export default function CheckoutPanel() {
             {/* Action Button */}
             {step === 1 && (
               <button
-                onClick={() => setStep(2)}
+                onClick={() => setShowTipOverlay(true)}
                 disabled={!canProceedStep1}
                 className="w-full bg-brand-brown text-white py-4 px-4 rounded-button font-semibold text-lg
                            hover:bg-brand-brown/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
