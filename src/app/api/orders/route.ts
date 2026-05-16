@@ -115,6 +115,7 @@ export async function POST(request: Request) {
       .select('*', { count: 'exact', head: true })
       .eq('pickup_date', body.pickup_date)
       .eq('pickup_time', body.pickup_time)
+      .neq('status', 'cancelled')
 
     if (countError) {
       console.error('Error checking order count:', countError)
