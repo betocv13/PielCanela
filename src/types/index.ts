@@ -64,6 +64,7 @@ export interface Order {
   items: OrderItem[]
   subtotal: number
   tax: number
+  tip: number
   total: number
   payment_method: 'cash' | 'venmo' | 'cashapp' | 'stripe'
   stripe_payment_intent_id?: string
@@ -134,6 +135,7 @@ export interface CreateOrderPayload {
   customer_email?: string
   items: OrderItem[]
   subtotal: number
+  tip?: number
   total: number
   payment_method: 'cash' | 'stripe'
   pickup_date: string

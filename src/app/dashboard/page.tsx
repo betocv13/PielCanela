@@ -382,7 +382,13 @@ export default function OrdersPage() {
                     </div>
                   ))}
                 </div>
-                <div className="flex justify-between mt-3 pt-3 border-t border-gray-100">
+                {order.tip > 0 && (
+                  <div className="flex justify-between mt-3 pt-3 border-t border-gray-100">
+                    <span className="font-semibold text-brand-brown">Tip:</span>
+                    <span className="font-bold text-[#8B4513]">${order.tip.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className={`flex justify-between ${order.tip > 0 ? 'mt-1' : 'mt-3 pt-3 border-t border-gray-100'}`}>
                   <span className="font-semibold text-brand-brown">Total:</span>
                   <span className="font-bold text-[#8B4513]">${order.total.toFixed(2)}</span>
                 </div>

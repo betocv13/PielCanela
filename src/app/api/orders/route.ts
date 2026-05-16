@@ -197,6 +197,7 @@ export async function POST(request: Request) {
         items: updatedItems,
         subtotal,
         tax,
+        tip: body.tip ?? 0,
         total,
         payment_method: body.payment_method,
         pickup_date: body.pickup_date,
