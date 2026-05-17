@@ -30,8 +30,22 @@ export default function MenuSection({ products, onOrderProduct, loading = false 
   useEffect(() => {
     fetch('/api/pickup-dates')
       .then(r => r.json())
-      .then(data => {
-        if (!data.dates || data.dates.length === 0) {
+      .then(async (data) => {
+        const dates: { date: string }[] = data.dates || []
+        if (dates.length === 0) {
+          setIsOrderingOpen(false)
+          return
+        }
+        const results = await Promise.all(
+          dates.map(d =>
+            fetch(`/api/orders/available-slots?date=${d.date}`)
+              .then(r => r.json())
+              .then(s => (s.slots as string[]) || [])
+              .catch(() => [] as string[])
+          )
+        )
+        const allSlots = results.flat()
+        if (allSlots.length === 0) {
           setIsOrderingOpen(false)
         }
       })
