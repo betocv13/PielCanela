@@ -170,7 +170,7 @@ export async function POST(request: Request) {
 
     // Round tax to 2 decimal places
     tax = Math.round(tax * 100) / 100
-    const total = subtotal + tax
+    const total = subtotal + tax + (body.tip ?? 0)
 
     // Generate order number using the database function
     const { data: orderNumberData, error: orderNumberError } = await supabase
