@@ -12,10 +12,10 @@ export default function AnnouncementBar() {
         if (settings?.ordering_enabled) {
           setText('WELCOME TO OUR STORE')
         } else {
-          setText(settings?.ordering_closed_message || 'CLOSED FOR PICKUP')
+          setText(settings?.ordering_closed_message || 'ONLINE ORDERING IS CLOSED')
         }
       })
-      .catch(() => setText('CLOSED FOR PICKUP'))
+      .catch(() => setText('ONLINE ORDERING IS CLOSED'))
   }, [])
 
   return (
