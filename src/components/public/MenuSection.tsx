@@ -24,6 +24,20 @@ export default function MenuSection({ products, onOrderProduct, loading = false 
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
+  const [isOrderingOpen, setIsOrderingOpen] = useState(true)
+  const [isCheckingDates, setIsCheckingDates] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/pickup-dates')
+      .then(r => r.json())
+      .then(data => {
+        if (!data.dates || data.dates.length === 0) {
+          setIsOrderingOpen(false)
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsCheckingDates(false))
+  }, [])
 
   useEffect(() => {
     const el = scrollRef.current
@@ -53,7 +67,7 @@ export default function MenuSection({ products, onOrderProduct, loading = false 
     el.scrollBy({ left: dir * (cardWidth + gap), behavior: 'smooth' })
   }
 
-  const isLoading = loading || products.length === 0
+  const isLoading = loading || products.length === 0 || isCheckingDates
 
   return (
     <section className="bg-white py-10 md:py-14">
@@ -109,7 +123,7 @@ export default function MenuSection({ products, onOrderProduct, loading = false 
                     className="menu-card-wrapper"
                     style={{ scrollSnapAlign: 'start' }}
                   >
-                    <ProductCard product={product} onOrder={onOrderProduct} />
+                    <ProductCard product={product} onOrder={onOrderProduct} isOrderingOpen={isOrderingOpen} />
                   </div>
                 ))}
           </div>

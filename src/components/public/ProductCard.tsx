@@ -8,6 +8,7 @@ import { formatPrice } from '@/lib/utils'
 interface ProductCardProps {
   product: Product
   onOrder: (product: Product) => void
+  isOrderingOpen: boolean
 }
 
 function categoryBadge(category: string): string {
@@ -18,13 +19,14 @@ function categoryBadge(category: string): string {
   return '#000000'
 }
 
-export default function ProductCard({ product, onOrder }: ProductCardProps) {
+export default function ProductCard({ product, onOrder, isOrderingOpen }: ProductCardProps) {
   const [imgError, setImgError] = useState(false)
+  const [showClosedModal, setShowClosedModal] = useState(false)
 
   return (
     // Fills the .menu-card-wrapper container (position: relative, aspect-ratio)
     <button
-      onClick={() => onOrder(product)}
+      onClick={() => isOrderingOpen ? onOrder(product) : setShowClosedModal(true)}
       className="absolute inset-0 cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown"
       style={{ borderRadius: 'var(--content-radius)' }}
     >
@@ -94,6 +96,43 @@ export default function ProductCard({ product, onOrder }: ProductCardProps) {
           {product.description}
         </p>
       </div>
+
+      {/* Closed modal */}
+      {showClosedModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-6"
+          onClick={(e) => { e.stopPropagation(); setShowClosedModal(false) }}
+        >
+          <div className="absolute inset-0 bg-black/50" />
+          <div
+            className="relative bg-white rounded-2xl p-8 max-w-xs w-full text-center shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-5xl mb-4">🔒</div>
+            <h3 className="text-xl font-menu font-bold text-brand-brown mb-2">
+              Ordering is Closed
+            </h3>
+            <p className="text-sm text-gray-500 mb-4">
+              We&apos;re not accepting orders right now. Check our Instagram for available times.
+            </p>
+            <a
+              href="https://www.instagram.com/pielcanela.coffee/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-sm font-semibold text-brand-brown hover:underline mb-5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              @pielcanelacoffee
+            </a>
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowClosedModal(false) }}
+              className="w-full bg-brand-brown text-white py-3 rounded-button font-semibold hover:bg-brand-brown/90 transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </button>
   )
 }
