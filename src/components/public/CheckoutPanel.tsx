@@ -267,7 +267,8 @@ export default function CheckoutPanel() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         orderId: createdOrderId,
-        amount: Math.round(total * 100)
+        amount: Math.round(total * 100),
+        orderNumber: orderData.order.order_number
       })
     })
 
