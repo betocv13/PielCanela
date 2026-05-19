@@ -52,6 +52,13 @@ export default function MenuManagementPage() {
     fetchProducts()
   }, [])
 
+  useEffect(() => {
+    return () => {
+      setIsProductModalOpen(false)
+      setSelectedProduct(null)
+    }
+  }, [])
+
   // Filter and sort products
   const filteredProducts = useMemo(() => {
     let result = [...products]
