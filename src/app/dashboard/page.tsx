@@ -95,6 +95,13 @@ export default function OrdersPage() {
     }
   }, [fetchOrders])
 
+  useEffect(() => {
+    return () => {
+      setConfirmingComplete(null)
+      setConfirmingCancel(null)
+    }
+  }, [])
+
   // Filter orders based on active tab
   const filteredOrders = orders.filter(order => {
     switch (activeTab) {
