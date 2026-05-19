@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { format, formatDistanceToNow, isToday, parseISO } from 'date-fns'
-import { Clock, User, Phone, ChevronDown } from 'lucide-react'
+import { Clock, User, Phone, ChevronDown, Copy } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Order } from '@/types'
 
@@ -17,6 +17,7 @@ export default function OrdersPage() {
   const [showSortDropdown, setShowSortDropdown] = useState(false)
   const [confirmingComplete, setConfirmingComplete] = useState<{ id: string; orderNumber: string } | null>(null)
   const [confirmingCancel, setConfirmingCancel] = useState<{ id: string; orderNumber: string } | null>(null)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   // Calculate stats
   const todaysOrders = orders.filter(order => isToday(parseISO(order.pickup_date))).length
@@ -424,6 +425,21 @@ export default function OrdersPage() {
                     </span>
                   )}
                 </div>
+                {order.payment_method === 'stripe' && order.stripe_payment_intent_id && (
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(order.stripe_payment_intent_id!)
+                      setCopiedId(order.id)
+                      setTimeout(() => setCopiedId(null), 2000)
+                    }}
+                    className="mt-2 flex items-center gap-1.5 px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                  >
+                    <span className="text-xs font-mono text-gray-500">
+                      {copiedId === order.id ? 'Copied!' : `${order.stripe_payment_intent_id.slice(0, 16)}...`}
+                    </span>
+                    <Copy className="w-3 h-3 text-gray-400 shrink-0" />
+                  </button>
+                )}
               </div>
 
               {order.status !== 'completed' && order.status !== 'cancelled' && (
