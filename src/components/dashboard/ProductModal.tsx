@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import Image from 'next/image'
 import { X, Upload, Plus, Trash2 } from 'lucide-react'
 import { Product, SizeOption, MilkOption, AddonOption } from '@/types'
@@ -86,9 +86,12 @@ export default function ProductModal({
   const [customCategory, setCustomCategory] = useState('')
 
   // Combine default and existing categories
-  const allCategories = Array.from(new Set([...DEFAULT_CATEGORIES, ...existingCategories.map(c =>
-    c.charAt(0).toUpperCase() + c.slice(1)
-  )]))
+  const allCategories = useMemo(() =>
+    Array.from(new Set([...DEFAULT_CATEGORIES, ...existingCategories.map(c =>
+      c.charAt(0).toUpperCase() + c.slice(1)
+    )])),
+    [existingCategories]
+  )
 
   // Fetch global options from settings
   useEffect(() => {
